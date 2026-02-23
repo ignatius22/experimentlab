@@ -4,8 +4,8 @@
 
 **A portfolio-grade frontend architecture demo built around feature flags, A/B experimentation, analytics instrumentation, and Core Web Vitals.**
 
-[![CI](https://img.shields.io/github/actions/workflow/status/yourusername/experimentlab/ci.yml?label=CI&style=flat-square)](https://github.com/yourusername/experimentlab/actions)
-[![E2E](https://img.shields.io/github/actions/workflow/status/yourusername/experimentlab/e2e.yml?label=E2E&style=flat-square)](https://github.com/yourusername/experimentlab/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/ignatius22/experimentlab/ci.yml?label=CI&style=flat-square)](https://github.com/ignatius22/experimentlab/actions)
+[![E2E](https://img.shields.io/github/actions/workflow/status/ignatius22/experimentlab/e2e.yml?label=E2E&style=flat-square)](https://github.com/ignatius22/experimentlab/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-monorepo-F69220?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io/)
@@ -77,7 +77,7 @@ ExperimentLab/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/experimentlab.git
+git clone https://github.com/ignatius22/experimentlab.git
 cd experimentlab
 
 # Install all dependencies
