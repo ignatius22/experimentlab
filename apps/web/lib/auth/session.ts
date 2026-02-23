@@ -5,7 +5,7 @@ export type Session = {
   createdAt: string;
 };
 
-const SESSION_KEY = "experimentlab.session";
+export const SESSION_KEY = "experimentlab.session";
 
 export function getSession(): Session | null {
   if (typeof window === "undefined") return null;

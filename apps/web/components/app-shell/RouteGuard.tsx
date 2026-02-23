@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getSession, type Session } from "@/lib/auth/session";
+import { getSession, SESSION_KEY, type Session } from "@/lib/auth/session";
 
 export default function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -24,6 +24,22 @@ export default function RouteGuard({ children }: { children: React.ReactNode }) 
       router.replace(`/login?next=${encodeURIComponent(nextUrl)}`);
       return;
     }
+  }, [isProtected, nextUrl, router]);
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== SESSION_KEY) return;
+
+      const currentSession = getSession();
+      setSession(currentSession);
+
+      if (!currentSession && isProtected) {
+        router.replace(`/login?next=${encodeURIComponent(nextUrl)}`);
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [isProtected, nextUrl, router]);
 
   if (!session && isProtected) {
