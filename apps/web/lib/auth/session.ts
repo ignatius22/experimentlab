@@ -1,22 +1,32 @@
 "use client";
 
+export type Session = {
+  userId: string;
+  createdAt: string;
+};
+
 const SESSION_KEY = "experimentlab.session";
 
-export function getSessionUserId(): string | null {
-  if (typeof window === "undefined") {
+export function getSession(): Session | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.localStorage.getItem(SESSION_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as Session;
+  } catch {
+    window.localStorage.removeItem(SESSION_KEY);
     return null;
   }
-  return localStorage.getItem(SESSION_KEY);
 }
 
-export function signInDemoUser(userId = "demo-user-001") {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(SESSION_KEY, userId);
-  }
+export function setSession(session: Session): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
-export function signOut() {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(SESSION_KEY);
-  }
+export function clearSession(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(SESSION_KEY);
 }

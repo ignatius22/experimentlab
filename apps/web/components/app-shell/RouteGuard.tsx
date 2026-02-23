@@ -1,25 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { getSessionUserId } from "../../lib/auth/session";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { getSession, type Session } from "@/lib/auth/session";
 
-export function RouteGuard({ children }: { children: React.ReactNode }) {
+export default function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [ready, setReady] = useState(false);
+  const searchParams = useSearchParams();
+  const [session, setSession] = useState<Session | null>(() => getSession());
+  const isProtected = pathname.startsWith("/app");
+
+  const nextUrl = useMemo(() => {
+    const qs = searchParams.toString();
+    return qs ? `${pathname}?${qs}` : pathname;
+  }, [pathname, searchParams]);
 
   useEffect(() => {
-    const userId = getSessionUserId();
-    if (!userId && pathname.startsWith("/app")) {
-      router.replace("/login");
+    const currentSession = getSession();
+    setSession(currentSession);
+
+    if (!currentSession && isProtected) {
+      router.replace(`/login?next=${encodeURIComponent(nextUrl)}`);
       return;
     }
-    setReady(true);
-  }, [pathname, router]);
+  }, [isProtected, nextUrl, router]);
 
-  if (!ready) {
-    return <p className="container">Checking session...</p>;
+  if (!session && isProtected) {
+    return null;
   }
 
   return <>{children}</>;

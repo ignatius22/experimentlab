@@ -1,7 +1,7 @@
 "use client";
 
-import { AppNav } from "../../components/app-shell/AppNav";
-import { RouteGuard } from "../../components/app-shell/RouteGuard";
+import { AppNav } from "@/components/app-shell/AppNav";
+import RouteGuard from "@/components/app-shell/RouteGuard";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,3 +16,4 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </RouteGuard>
   );
 }
+

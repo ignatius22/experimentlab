@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { initWebVitals } from "../lib/webVitals";
 import { identify, page } from "../lib/analytics";
-import { getSessionUserId } from "../lib/auth/session";
+import { getSession } from "@/lib/auth/session";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,9 +19,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     initWebVitals();
 
-    const userId = getSessionUserId();
-    if (userId) {
-      identify(userId, { plan: "pro" });
+    const session = getSession();
+    if (session?.userId) {
+      identify(session.userId, { plan: "pro" });
     }
   }, []);
 
