@@ -1,9 +1,9 @@
 {
   "name": "experiment-lab",
   "private": true,
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.0.0",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "turbo run dev --parallel",
