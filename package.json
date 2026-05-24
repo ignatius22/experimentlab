@@ -1,13 +1,10 @@
 {
   "name": "experiment-lab",
   "private": true,
+  "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": "24.x"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
