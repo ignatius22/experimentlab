@@ -1,9 +1,6 @@
 {
   "$schema": "https://vercel.com/schema.json",
   "installCommand": "npx pnpm@10.33.0 install --no-frozen-lockfile",
-  "buildCommand": "pnpm build",
-  "framework": "nextjs",
-  "outputDirectory": "apps/web/.next",
   "headers": [
     {
       "source": "/api/(.*)",
