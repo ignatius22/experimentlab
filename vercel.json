@@ -1,6 +1,6 @@
 {
   "$schema": "https://vercel.com/schema.json",
-  "installCommand": "pnpm install",
+  "installCommand": "npm install -g pnpm@latest && pnpm install",
   "buildCommand": "npx turbo run build",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next",
