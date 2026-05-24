@@ -1,7 +1,7 @@
 {
   "name": "experiment-lab",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": "24.x"
   },
