@@ -2,32 +2,12 @@ import {
   CreateExperimentInputSchema,
   ExperimentListSchema,
   ExperimentSchema,
-  type CreateExperimentInput,
-  type Experiment
+  type CreateExperimentInput
 } from "@experiment/schemas";
-
-let memoryExperiments: Experiment[] = [
-  {
-    id: "exp_001",
-    key: "homepage_headline",
-    name: "Homepage headline test",
-    status: "active",
-    variants: [
-      { id: "control", name: "Control", weight: 50 },
-      { id: "variant", name: "Outcome focused", weight: 50 }
-    ],
-    metrics: ["signup_rate", "cta_click_rate"],
-    rollout: 100,
-    createdAt: new Date().toISOString()
-  }
-];
-
-export function listExperiments() {
-  return memoryExperiments;
-}
 
 export async function fetchExperiments() {
   const response = await fetch("/api/experiments");
+  if (!response.ok) return [];
   const json = await response.json();
   return ExperimentListSchema.parse(json);
 }
@@ -45,7 +25,5 @@ export async function createExperiment(input: CreateExperimentInput) {
     throw new Error("Create failed");
   }
 
-  const created = ExperimentSchema.parse(await response.json());
-  memoryExperiments = [created, ...memoryExperiments];
-  return created;
+  return ExperimentSchema.parse(await response.json());
 }

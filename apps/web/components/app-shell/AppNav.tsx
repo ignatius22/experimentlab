@@ -1,72 +1,94 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { clearSession, getSession, SESSION_KEY, type Session } from "@/lib/auth/session";
+import { usePathname } from "next/navigation";
+import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
+import { 
+  FlaskConical, 
+  Flag, 
+  BarChart3, 
+  Zap, 
+  ShieldCheck,
+  User
+} from "lucide-react";
 
 const links = [
-  { href: "/app/experiments", label: "Experiments" },
-  { href: "/app/flags", label: "Flags" },
-  { href: "/app/analytics", label: "Analytics" },
-  { href: "/app/performance", label: "Performance" },
-  { href: "/app/design-system", label: "Design System" },
-  { href: "/app/proof", label: "Proof" }
+  { href: "/app/experiments", label: "Experiments", icon: FlaskConical },
+  { href: "/app/flags", label: "Feature Flags", icon: Flag },
+  { href: "/app/analytics", label: "Event Stream", icon: BarChart3 },
+  { href: "/app/performance", label: "Performance", icon: Zap },
+  { href: "/app/proof", label: "Proof Dashboard", icon: ShieldCheck }
 ];
 
-export function AppNav() {
+interface AppNavProps {
+  orientation?: "horizontal" | "vertical";
+}
+
+export function AppNav({ orientation = "horizontal" }: AppNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [session, setSession] = useState<Session | null>(() => getSession());
-
-  useEffect(() => {
-    setSession(getSession());
-
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== SESSION_KEY) return;
-      setSession(getSession());
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  const isVertical = orientation === "vertical";
 
   return (
-    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-      <nav style={{ display: "flex", gap: 12, flexWrap: "wrap" }} aria-label="App Navigation">
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            style={{ fontWeight: pathname === link.href ? 700 : 500 }}
-          >
-            {link.label}
-          </Link>
-        ))}
+    <div style={{ 
+      display: "flex", 
+      flexDirection: "column",
+      height: "100%",
+      justifyContent: "space-between",
+      paddingTop: isVertical ? 24 : 0
+    }}>
+      <nav style={{ 
+        display: "flex", 
+        flexDirection: isVertical ? "column" : "row", 
+        gap: 4 
+      }} aria-label="App Navigation">
+        {links.map((link) => {
+          const active = pathname.startsWith(link.href);
+          const Icon = link.icon;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`ui-sidebar-link ${active ? "ui-sidebar-link-active" : ""}`}
+            >
+              <Icon size={18} />
+              {link.label}
+            </Link>
+          );
+        })}
       </nav>
-      {session ? (
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 10px",
-            borderRadius: 999,
-            background: "#ecfeff"
+
+      <div style={{ 
+        marginTop: "auto",
+        paddingTop: 24,
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        borderTop: "1px solid rgba(255,255,255,0.1)"
+      }}>
+        <OrganizationSwitcher 
+          hidePersonal 
+          afterCreateOrganizationUrl="/app"
+          appearance={{
+            elements: {
+              rootBox: { width: "100%" },
+              organizationSwitcherTrigger: { 
+                width: "100%",
+                background: "rgba(255,255,255,0.05)",
+                color: "white",
+                padding: "8px 12px",
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid rgba(255,255,255,0.1)"
+              }
+            }
           }}
-        >
-          <span style={{ fontSize: 12 }}>Signed in: {session.userId}</span>
-          <button
-            onClick={() => {
-              clearSession();
-              setSession(null);
-              router.replace("/login");
-            }}
-          >
-            Logout
-          </button>
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 12px" }}>
+          <UserButton />
+          <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", gap: 8 }}>
+             Account
+          </span>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

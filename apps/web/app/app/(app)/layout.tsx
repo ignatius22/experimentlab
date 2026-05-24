@@ -1,19 +1,22 @@
 "use client";
 
 import { AppNav } from "@/components/app-shell/AppNav";
-import RouteGuard from "@/components/app-shell/RouteGuard";
+import { Beaker } from "lucide-react";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RouteGuard>
-      <div className="container stack">
-        <header className="grid" style={{ gridTemplateColumns: "1fr auto" }}>
-          <h1 style={{ margin: 0 }}>ExperimentLab App</h1>
-          <AppNav />
-        </header>
+    <div className="app-shell">
+      <aside className="ui-sidebar">
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 12px" }}>
+          <Beaker size={24} color="var(--color-accent)" />
+          <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>ExperimentLab</h2>
+        </div>
+        <AppNav orientation="vertical" />
+      </aside>
+      <main className="main-content">
         {children}
-      </div>
-    </RouteGuard>
+      </main>
+    </div>
   );
 }
 

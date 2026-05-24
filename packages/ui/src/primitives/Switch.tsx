@@ -1,12 +1,13 @@
 "use client";
 
-type SwitchProps = {
+interface SwitchProps {
   checked: boolean;
-  onChange: (value: boolean) => void;
-  label: string;
-};
+  onChange: (checked: boolean) => void;
+  label?: string;
+}
 
 export function Switch({ checked, onChange, label }: SwitchProps) {
+
   return (
     <label style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
       <input

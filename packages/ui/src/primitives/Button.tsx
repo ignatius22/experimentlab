@@ -2,18 +2,18 @@
 
 import type { ButtonHTMLAttributes } from "react";
 
-export function Button(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "accent" | "danger" | "warning";
+}
+
+export function Button({ variant = "primary", className = "", ...props }: ButtonProps) {
+  const variantClass = `ui-button-${variant}`;
+  const classes = `ui-button ${variant !== "primary" ? variantClass : ""} ${className}`.trim();
+
   return (
     <button
+      className={classes}
       {...props}
-      style={{
-        background: "var(--color-primary)",
-        color: "var(--color-primary-contrast)",
-        border: "none",
-        borderRadius: "var(--radius-sm)",
-        padding: "10px 14px",
-        cursor: "pointer"
-      }}
     />
   );
 }

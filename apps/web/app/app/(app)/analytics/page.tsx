@@ -13,9 +13,13 @@ export default function AnalyticsPage() {
 
   return (
     <section className="stack">
-      <h2>Analytics Event Stream</h2>
-      <p>Rendering 10,000 events using virtualization + requestAnimationFrame batched updates.</p>
-      <VirtualizedEventList events={events} />
+      <header>
+        <h1 style={{ fontSize: "1.8rem" }}>Event Stream</h1>
+        <p style={{ color: "var(--color-text-muted)" }}>Real-time feed of all experiments and flag evaluations.</p>
+      </header>
+      <div style={{ marginTop: "var(--space-4)" }}>
+        <VirtualizedEventList events={events} />
+      </div>
     </section>
   );
 }

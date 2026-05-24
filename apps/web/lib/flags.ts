@@ -3,8 +3,8 @@ import { bucket } from "./bucketing";
 
 export function getDefaultFlags(): FeatureFlag[] {
   return [
-    { key: "new_nav", description: "Enable new top nav", enabled: true, rollout: 100 },
-    { key: "quick_create", description: "Show quick create CTA", enabled: false, rollout: 50 }
+    { key: "new_nav", description: "Enable new top nav", enabled: true, rollout: 100, rules: [] },
+    { key: "quick_create", description: "Show quick create CTA", enabled: false, rollout: 50, rules: [] }
   ];
 }
 

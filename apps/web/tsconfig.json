@@ -3,9 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@experiment/schemas": ["../../packages/schemas/src/index.ts"],
+      "@experiment/ui": ["../../packages/ui/src/index.ts"],
+      "@experiment/db": ["../../packages/db/src/index.ts"],
+      "@experiment/sdk-core": ["../../packages/sdk-core/src/index.ts"],
+      "@experiment/sdk-react": ["../../packages/sdk-react/src/index.tsx"]
     },
     "plugins": [
       {
@@ -14,7 +17,7 @@
     ],
     "types": [
       "vitest/globals",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom/vitest"
     ],
     "allowJs": true,
     "noEmit": true,

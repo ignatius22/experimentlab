@@ -1,18 +1,15 @@
-export function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "4px 8px",
-        borderRadius: 999,
-        background: "#cffafe",
-        color: "#0f766e",
-        fontSize: 12,
-        fontWeight: 700
-      }}
-    >
-      {children}
-    </span>
-  );
+"use client";
+
+import React from "react";
+
+interface BadgeProps {
+  children: React.ReactNode;
+  variant?: "success" | "warning" | "danger" | "neutral" | "accent";
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function Badge({ children, variant = "neutral", className = "", style }: BadgeProps) {
+  const classes = `ui-badge ui-badge-${variant} ${className}`.trim();
+  return <span className={classes} style={style}>{children}</span>;
 }

@@ -13,6 +13,7 @@ let experiments: Experiment[] = [
     ],
     metrics: ["signup_rate"],
     rollout: 100,
+    rules: [],
     createdAt: new Date().toISOString()
   }
 ];
@@ -37,6 +38,7 @@ export const handlers = [
       ],
       metrics: parsed.data.metrics,
       rollout: 100,
+      rules: [],
       createdAt: new Date().toISOString()
     };
 

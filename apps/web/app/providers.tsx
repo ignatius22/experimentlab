@@ -1,33 +1,44 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { ExperimentProvider } from "@experiment/sdk-react";
+import { ExperimentClient } from "@experiment/sdk-core";
 import { initWebVitals } from "../lib/webVitals";
 import { identify, page } from "../lib/analytics";
-import { getSession } from "@/lib/auth/session";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { userId, orgId } = useAuth();
+
+  const client = useMemo(() => {
+    if (!userId || !orgId) return null;
+    return new ExperimentClient({
+      publishableKey: orgId,
+      userId
+    });
+  }, [userId, orgId]);
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_API_MOCKING === "enabled") {
-      void (async () => {
-        const { startMocking } = await import("../mocks/browser");
-        await startMocking();
-      })();
-    }
-
     initWebVitals();
 
-    const session = getSession();
-    if (session?.userId) {
-      identify(session.userId, { plan: "pro" });
+    if (userId) {
+      identify(userId, { plan: "pro" });
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     page(pathname);
   }, [pathname]);
 
-  return <>{children}</>;
+  if (!client) {
+    return <>{children}</>;
+  }
+
+  return (
+    <ExperimentProvider client={client}>
+      {children}
+    </ExperimentProvider>
+  );
 }

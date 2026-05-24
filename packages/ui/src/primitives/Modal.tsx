@@ -1,33 +1,46 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
-type ModalProps = {
-  open: boolean;
+interface ModalProps {
+  isOpen: boolean;
   title: string;
   onClose: () => void;
   children: React.ReactNode;
-};
+}
 
-export function Modal({ open, title, onClose, children }: ModalProps) {
+export function Modal({ isOpen, title, onClose, children }: ModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       closeRef.current?.focus();
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
     }
-  }, [open]);
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isOpen]);
 
-  if (!open) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={title} style={{ padding: 16, background: "#11182722" }}>
-      <div style={{ background: "white", borderRadius: 12, padding: 16 }}>
-        <h3>{title}</h3>
-        <div>{children}</div>
-        <button ref={closeRef} onClick={onClose}>Close</button>
+    <div 
+      className="ui-modal-overlay"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="ui-modal-container">
+        <div className="ui-modal-header">
+          <h3 style={{ fontSize: "1.25rem", fontWeight: 600 }}>{title}</h3>
+          <button 
+            ref={closeRef} 
+            onClick={onClose}
+            className="ui-modal-close"
+          >
+            &times;
+          </button>
+        </div>
+        <div className="ui-modal-body">{children}</div>
       </div>
     </div>
   );
