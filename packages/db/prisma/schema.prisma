@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Organization {
+  id           String        @id // Clerk Organization ID
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  experiments  Experiment[]
+  featureFlags FeatureFlag[]
+  users        User[]
+}
+
+model User {
+  id             String       @id // Clerk User ID
+  email          String       @unique
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Experiment {
+  id               String       @id @default(cuid())
+  name             String
+  key              String       @unique
+  status           String       @default("draft") // draft, running, paused, completed
+  variants         Json         // Array of variants with weights
+  metrics          String[]     // Array of metric keys
+  rollout          Int          @default(100)
+  rules            Json?        // Target rules
+  winningVariantId String?
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+model FeatureFlag {
+  id             String       @id @default(cuid())
+  name           String
+  key            String       @unique
+  description    String?
+  enabled        Boolean      @default(false)
+  rules          Json?        // Targeting rules
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+model Event {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  type           String   // exposure | track
+  name           String   // experiment key or metric name
+  variantId      String?  // variant assigned (for exposures)
+  payload        Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([name])
+}

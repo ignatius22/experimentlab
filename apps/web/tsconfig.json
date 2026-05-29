@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@experiment/schemas": ["../../packages/schemas/src/index.ts"],
+      "@experiment/ui": ["../../packages/ui/src/index.ts"],
+      "@experiment/db": ["../../packages/db/src/index.ts"],
+      "@experiment/sdk-core": ["../../packages/sdk-core/src/index.ts"],
+      "@experiment/sdk-react": ["../../packages/sdk-react/src/index.tsx"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom/vitest"
+    ],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
