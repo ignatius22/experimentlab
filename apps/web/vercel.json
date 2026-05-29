@@ -1,8 +1,8 @@
 {
   "$schema": "https://vercel.com/schema.json",
   "framework": "nextjs",
-  "installCommand": "cd ../.. && npx pnpm@10.33.0 install --no-frozen-lockfile",
-  "buildCommand": "cd ../.. && npx turbo run build --filter=@experiment/web",
+  "installCommand": "pnpm install",
+  "buildCommand": "turbo run build --filter=@experiment/web",
   "headers": [
     {
       "source": "/api/(.*)",
