@@ -8,3 +8,6 @@ test-results
 pnpm-lock.yaml
 .turbo
 *.tsbuildinfo
+.env
+.env.local
+.env.*.local
