@@ -1,8 +1,6 @@
 {
   "$schema": "https://vercel.com/schema.json",
   "framework": "nextjs",
-  "installCommand": "pnpm install",
-  "buildCommand": "turbo run build --filter=@experiment/web",
   "headers": [
     {
       "source": "/api/(.*)",
