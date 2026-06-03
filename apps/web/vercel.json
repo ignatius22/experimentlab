@@ -1,7 +1,6 @@
 {
   "$schema": "https://vercel.com/schema.json",
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && pnpm build --filter=@experiment/web...",
   "outputDirectory": ".next",
   "headers": [
     {
