@@ -1,8 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { Beaker } from "lucide-react";
 import { Button } from "@experiment/ui";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,12 +31,20 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/" style={{ fontSize: "0.95rem", fontWeight: 500, color: "var(--color-text-muted)" }}>Pricing</Link>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Link href="/login">
-              <Button variant="secondary" style={{ border: "none" }}>Sign In</Button>
-            </Link>
-            <Link href="/app">
-              <Button>Get Started</Button>
-            </Link>
+            <SignedOut>
+              <Link href="/login">
+                <Button variant="secondary" style={{ border: "none" }}>Sign In</Button>
+              </Link>
+              <Link href="/signup">
+                <Button>Get Started</Button>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/app">
+                <Button variant="secondary" style={{ border: "none" }}>Dashboard</Button>
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
           </div>
         </nav>
       </header>

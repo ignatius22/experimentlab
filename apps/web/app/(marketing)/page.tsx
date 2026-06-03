@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 import { Button, Card, Badge } from "@experiment/ui";
 import { 
   Zap, 
@@ -12,7 +13,9 @@ import {
   PieChart
 } from "lucide-react";
 
-export default function MarketingPage() {
+export default async function MarketingPage() {
+  const { userId } = await auth();
+
   return (
     <div className="stack" style={{ gap: 0 }}>
       {/* Hero Section */}
@@ -35,15 +38,17 @@ export default function MarketingPage() {
           <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 12 }}>
             <Link href="/app">
               <Button style={{ padding: "14px 28px", fontSize: "1.1rem" }}>
-                Start Free Trial
+                {userId ? "Go to Dashboard" : "Start Free Trial"}
                 <ArrowRight size={20} style={{ marginLeft: 8 }} />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="secondary" style={{ padding: "14px 28px", fontSize: "1.1rem" }}>
-                View Demo
-              </Button>
-            </Link>
+            {!userId && (
+              <Link href="/login">
+                <Button variant="secondary" style={{ padding: "14px 28px", fontSize: "1.1rem" }}>
+                  View Demo
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
