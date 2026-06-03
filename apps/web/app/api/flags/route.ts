@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@experiment/db";
+import { CreateFeatureFlagInputSchema } from "@experiment/schemas";
 
 export async function GET() {
   const { orgId } = await auth();
@@ -16,9 +17,15 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const { orgId } = await auth();
-  const { key, name, description, enabled } = await req.json();
+  const body = await req.json();
+  const parsed = CreateFeatureFlagInputSchema.safeParse(body);
 
   if (!orgId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid payload", details: parsed.error.format() }, { status: 400 });
+  }
+
+  const { key, description } = parsed.data;
 
   // Sync org
   await prisma.organization.upsert({
@@ -30,9 +37,9 @@ export async function POST(req: Request) {
   const flag = await prisma.featureFlag.create({
     data: {
       key,
-      name: name || key,
-      description,
-      enabled: enabled || false,
+      name: key,
+      description: description || "",
+      enabled: false,
       organizationId: orgId,
       rules: []
     }

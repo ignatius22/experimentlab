@@ -12,9 +12,11 @@ export const VariantSchema = z.object({
   weight: z.number().int().min(0).max(100)
 });
 
+export const KeySchema = z.string().regex(/^[a-z0-9_]+$/i, "Keys must only contain alphanumeric characters and underscores");
+
 export const ExperimentSchema = z.object({
   id: z.string(),
-  key: z.string(),
+  key: KeySchema,
   name: z.string(),
   status: z.enum(["draft", "active", "paused", "completed"]),
   variants: z.array(VariantSchema).min(1),
@@ -26,7 +28,7 @@ export const ExperimentSchema = z.object({
 });
 
 export const FeatureFlagSchema = z.object({
-  key: z.string(),
+  key: KeySchema,
   description: z.string(),
   enabled: z.boolean(),
   rollout: z.number().int().min(0).max(100).default(100),
@@ -35,9 +37,14 @@ export const FeatureFlagSchema = z.object({
 
 export const CreateExperimentInputSchema = z.object({
   name: z.string().min(2),
-  key: z.string().min(2),
+  key: KeySchema,
   metrics: z.array(z.string()).default(["signup_rate"]),
   rules: z.array(RuleSchema).optional()
+});
+
+export const CreateFeatureFlagInputSchema = z.object({
+  key: KeySchema,
+  description: z.string().optional()
 });
 
 export const ExperimentListSchema = z.array(ExperimentSchema);

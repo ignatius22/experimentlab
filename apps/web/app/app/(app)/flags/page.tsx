@@ -13,6 +13,7 @@ export default function FlagsPage() {
   const [newKey, setNewKey] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadFlags = async () => {
     const res = await fetch("/api/flags");
@@ -26,7 +27,7 @@ export default function FlagsPage() {
 
   const toggleFlag = async (key: string, current: boolean) => {
     setFlags(prev => prev.map(f => f.key === key ? { ...f, enabled: !current } : f));
-    await fetch(`/api/flags/${key}/toggle`, {
+    await fetch(`/api/flags/${encodeURIComponent(key)}/toggle`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled: !current })
@@ -36,6 +37,7 @@ export default function FlagsPage() {
   const onCreate = async () => {
     if (!newKey) return;
     setPending(true);
+    setError(null);
     try {
       const res = await fetch("/api/flags", {
         method: "POST",
@@ -47,6 +49,9 @@ export default function FlagsPage() {
         setIsModalOpen(false);
         setNewKey("");
         setNewDesc("");
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to create flag");
       }
     } finally {
       setPending(false);
@@ -123,6 +128,8 @@ export default function FlagsPage() {
           
           <label style={{ fontSize: "0.85rem", fontWeight: 500, marginTop: 8 }}>Description</label>
           <Input value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="What does this flag control?" />
+          
+          {error && <p style={{ color: "var(--color-danger)", fontSize: "0.85rem", marginTop: 8 }}>{error}</p>}
           
           <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
             <Button 
