@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Beaker } from "lucide-react";
 import { Button } from "@experiment/ui";
