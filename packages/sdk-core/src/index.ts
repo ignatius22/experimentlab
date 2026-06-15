@@ -48,6 +48,7 @@ export interface ExperimentManifest {
     variants: Variant[];
     rollout: number;
     status: string;
+    metrics?: string[];
     winningVariantId?: string | null;
     rules?: Rule[];
   }>;
@@ -78,6 +79,8 @@ export class ExperimentClient {
   private eventQueue: Event[] = [];
   private seenExposures: Set<string> = new Set();
   private flushTimer: any = null;
+  private assignments: Record<string, string> = {};
+  private STORAGE_KEY = "exp_assignments";
 
   constructor(options: { publishableKey: string; userId: string; baseUrl?: string; context?: Record<string, any> }) {
     this.publishableKey = options.publishableKey;
@@ -86,11 +89,30 @@ export class ExperimentClient {
     this.context = options.context || {};
 
     if (typeof window !== "undefined") {
+      this.loadAssignments();
       window.addEventListener("visibilitychange", () => {
         if (window.document.visibilityState === "hidden") {
           this.flush();
         }
       });
+    }
+  }
+
+  private loadAssignments() {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (raw) this.assignments = JSON.parse(raw);
+    } catch (e) {
+      console.error("[Experiment SDK] Failed to load assignments", e);
+    }
+  }
+
+  private saveAssignments() {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.assignments));
+    } catch (e) {
+      console.error("[Experiment SDK] Failed to save assignments", e);
     }
   }
 
@@ -149,9 +171,23 @@ export class ExperimentClient {
     const experiment = this.manifest.experiments.find((e) => e.key === key);
     if (!experiment) return null;
 
-    // Handle Completed Experiments (Winner Promoted)
+    // 1. Check Sticky Assignments
+    if (this.assignments[key]) {
+      const existing = experiment.variants.find((v) => v.id === this.assignments[key]);
+      if (existing) {
+        this.trackExposure(key, existing.id);
+        return existing;
+      }
+    }
+
+    // 2. Handle Completed Experiments (Winner Promoted)
     if (experiment.status === "completed" && experiment.winningVariantId) {
-      return experiment.variants.find(v => v.id === experiment.winningVariantId) ?? null;
+      const winner = experiment.variants.find(v => v.id === experiment.winningVariantId) ?? null;
+      if (winner) {
+        this.assignments[key] = winner.id;
+        this.saveAssignments();
+      }
+      return winner;
     }
 
     if (experiment.status !== "active") return null;
@@ -167,6 +203,10 @@ export class ExperimentClient {
       cursor += variant.weight;
       return value < cursor;
     }) ?? experiment.variants[0];
+
+    // 3. Persist Assignment
+    this.assignments[key] = selected.id;
+    this.saveAssignments();
 
     // Track exposure
     this.trackExposure(key, selected.id);

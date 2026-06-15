@@ -109,7 +109,8 @@ export default function ProofPage() {
               <div key={event.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--color-border)", fontSize: "0.85rem" }}>
                 <span style={{ fontWeight: 500 }}>{event.type.toUpperCase()}</span>
                 <span style={{ color: "var(--color-text-dim)" }}>
-                  {event.name} {event.variantId ? `(${event.variantId})` : ""}
+                  {(event.payload.name as string) || (event.payload.experimentKey as string) || ""} 
+                  {event.payload.variant ? ` (${event.payload.variant})` : ""}
                 </span>
                 <span style={{ color: "var(--color-text-dim)" }}>{new Date(event.timestamp).toLocaleTimeString()}</span>
               </div>
