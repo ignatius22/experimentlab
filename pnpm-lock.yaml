@@ -38,6 +38,9 @@ importers:
       '@experiment/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
       lucide-react:
         specifier: ^1.16.0
         version: 1.17.0(react@19.0.0)
