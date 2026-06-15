@@ -39,21 +39,28 @@ export async function POST(req: Request) {
     create: { id: orgId, name: "Auto-synced Organization" }
   });
 
-  const experiment = await prisma.experiment.create({
-    data: {
-      key: parsed.data.key,
-      name: parsed.data.name,
-      status: "draft",
-      variants: [
-        { id: "control", name: "Control", weight: 50 },
-        { id: "variant", name: "Variant", weight: 50 }
-      ],
-      metrics: parsed.data.metrics,
-      rollout: 100,
-      rules: (parsed.data.rules as any) || [],
-      organizationId: orgId
-    }
-  });
+  try {
+    const experiment = await prisma.experiment.create({
+      data: {
+        key: parsed.data.key,
+        name: parsed.data.name,
+        status: "draft",
+        variants: [
+          { id: "control", name: "Control", weight: 50 },
+          { id: "variant", name: "Variant", weight: 50 }
+        ],
+        metrics: parsed.data.metrics,
+        rollout: 100,
+        rules: (parsed.data.rules as any) || [],
+        organizationId: orgId
+      }
+    });
 
-  return NextResponse.json(experiment, { status: 201 });
+    return NextResponse.json(experiment, { status: 201 });
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return NextResponse.json({ error: "An experiment with this key already exists" }, { status: 400 });
+    }
+    throw error;
+  }
 }

@@ -34,16 +34,23 @@ export async function POST(req: Request) {
     create: { id: orgId, name: "New Org" }
   });
 
-  const flag = await prisma.featureFlag.create({
-    data: {
-      key,
-      name: key,
-      description: description || "",
-      enabled: false,
-      organizationId: orgId,
-      rules: []
-    }
-  });
+  try {
+    const flag = await prisma.featureFlag.create({
+      data: {
+        key,
+        name: key,
+        description: description || "",
+        enabled: false,
+        organizationId: orgId,
+        rules: []
+      }
+    });
 
-  return NextResponse.json(flag);
+    return NextResponse.json(flag);
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return NextResponse.json({ error: "A feature flag with this key already exists" }, { status: 400 });
+    }
+    throw error;
+  }
 }
