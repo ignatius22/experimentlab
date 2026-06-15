@@ -51,7 +51,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                     <Link href="/app">
                       <Button variant="secondary" style={{ border: "none" }}>Dashboard</Button>
                     </Link>
-                    <UserButton afterSignOutUrl="/" />
+                    <UserButton />
                   </>
                 )}
               </>
