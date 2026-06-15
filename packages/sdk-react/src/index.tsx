@@ -53,3 +53,13 @@ export function useSetContext() {
   const client = useExperimentClient();
   return (context: Record<string, any>) => client?.setContext(context);
 }
+
+export function useManifest() {
+  const client = useExperimentClient();
+  const state = useSyncExternalStore(
+    (l: () => void) => client ? client.subscribe(l) : () => {},
+    () => client ? client.getSnapshot() : EMPTY_STATE,
+    () => client ? client.getSnapshot() : EMPTY_STATE
+  );
+  return state.manifest;
+}
