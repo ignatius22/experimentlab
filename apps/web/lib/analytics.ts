@@ -30,20 +30,8 @@ function emit(type: AnalyticsEvent["type"], payload: Record<string, unknown>) {
   scheduleFlush();
 }
 
-export function seedLargeEventStream(total = 10000) {
-  if (events.length >= total) {
-    return;
-  }
-  const next: AnalyticsEvent[] = [];
-  for (let i = 0; i < total; i += 1) {
-    next.push({
-      id: `seed_${i}`,
-      type: "track",
-      timestamp: new Date(Date.now() - i * 1000).toISOString(),
-      payload: { name: "seed_event", sequence: i }
-    });
-  }
-  events = next;
+export function setEvents(newEvents: AnalyticsEvent[]) {
+  events = newEvents;
   listeners.forEach((listener) => listener());
 }
 
