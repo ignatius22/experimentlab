@@ -184,6 +184,26 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Custom scrollbar for sidebar */
+.ui-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.ui-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ui-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.ui-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .ui-sidebar-link {
