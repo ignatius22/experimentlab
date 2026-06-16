@@ -9,7 +9,17 @@ interface BadgeProps {
   style?: React.CSSProperties;
 }
 
-export function Badge({ children, variant = "neutral", className = "", style }: BadgeProps) {
+export function Badge({ 
+  children, 
+  variant = "neutral", 
+  className = "", 
+  style,
+  ...props 
+}: BadgeProps & React.HTMLAttributes<HTMLSpanElement>) {
   const classes = `ui-badge ui-badge-${variant} ${className}`.trim();
-  return <span className={classes} style={style}>{children}</span>;
+  return (
+    <span className={classes} style={style} {...props}>
+      {children}
+    </span>
+  );
 }
