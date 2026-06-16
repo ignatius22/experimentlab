@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useFlag } from "@experiment/sdk-react";
 import type { FeatureFlag } from "@experiment/schemas";
-import { Button, Table, THead, TBody, TR, TH, TD, Switch, Modal, Input, Badge } from "@experiment/ui";
+import { Button, Table, THead, TBody, TR, TH, TD, Switch, Modal, Input, Badge, Loader } from "@experiment/ui";
 import { Plus, Flag, Search, Info, CheckCircle2, XCircle } from "lucide-react";
 
 export default function FlagsPage() {
@@ -58,7 +58,7 @@ export default function FlagsPage() {
     }
   };
 
-  if (loading) return <p>Loading feature flags...</p>;
+  if (loading) return <Loader label="Loading feature flags..." />;
 
   return (
     <section className="stack">

@@ -6,7 +6,7 @@ import { useExperiment } from "@experiment/sdk-react";
 import { fetchExperiments } from "../../../../../lib/apiClient";
 import type { Experiment } from "@experiment/schemas";
 import type { StatsResult } from "../../../../../lib/stats";
-import { Button, Badge, Card, Table, THead, TBody, TR, TH, TD } from "@experiment/ui";
+import { Button, Badge, Card, Table, THead, TBody, TR, TH, TD, Loader } from "@experiment/ui";
 import { 
   ArrowLeft, 
   Play, 
@@ -80,7 +80,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
 
   const assignment = useExperiment(experiment?.key ?? "");
 
-  if (loading) return <p>Loading experiment details...</p>;
+  if (loading) return <Loader label="Loading experiment details..." />;
   if (!experiment) return <p>Experiment not found.</p>;
 
   const isDraft = experiment.status === "draft";
@@ -130,7 +130,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
         </div>
       </header>
 
-      <div className="grid" style={{ gridTemplateColumns: "2fr 1fr" }}>
+      <div className="experiment-grid">
         <div className="stack" style={{ gap: "var(--space-6)" }}>
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "var(--space-4)" }}>
@@ -274,6 +274,20 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
           </Card>
         </aside>
       </div>
+
+      <style jsx>{`
+        .experiment-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: var(--space-8);
+        }
+
+        @media (max-width: 1024px) {
+          .experiment-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </section>
   );
 }

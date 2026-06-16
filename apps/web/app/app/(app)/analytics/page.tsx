@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { subscribeEvents, getEvents, setEvents } from "../../../../lib/analytics";
 import { VirtualizedEventList } from "../../../../components/analytics/VirtualizedEventList";
-import { Badge, Button } from "@experiment/ui";
+import { Badge, Button, Loader } from "@experiment/ui";
 import { RefreshCw, Filter } from "lucide-react";
 
 export default function AnalyticsPage() {
@@ -72,7 +72,11 @@ export default function AnalyticsPage() {
       </div>
 
       <div style={{ marginTop: "var(--space-4)" }}>
-        <VirtualizedEventList events={filteredEvents} />
+        {loading && events.length === 0 ? (
+          <Loader label="Loading event history..." />
+        ) : (
+          <VirtualizedEventList events={filteredEvents} />
+        )}
       </div>
       
       <style jsx global>{`

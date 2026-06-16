@@ -4,7 +4,7 @@ import { useSyncExternalStore, useState } from "react";
 import { useFlag, useExperiment, useTrack, useManifest } from "@experiment/sdk-react";
 import { getVitals, subscribeVitals } from "../../../../lib/webVitals";
 import { getEvents, subscribeEvents } from "../../../../lib/analytics";
-import { Button, Card, Badge } from "@experiment/ui";
+import { Button, Card, Badge, Loader } from "@experiment/ui";
 import { Activity, Beaker, CheckCircle2, XCircle, Zap } from "lucide-react";
 
 export default function ProofPage() {
@@ -19,6 +19,10 @@ export default function ProofPage() {
   const allMetrics = Array.from(new Set(
     manifest?.experiments.flatMap(exp => exp.metrics || []) || []
   ));
+
+  if (!manifest) {
+    return <Loader label="Initializing SDK manifest..." />;
+  }
 
   return (
     <section className="stack" style={{ gap: "var(--space-8)" }}>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getVitals, subscribeVitals } from "../../../../lib/webVitals";
-import { Card, Badge, Button } from "@experiment/ui";
+import { Card, Badge, Button, Loader } from "@experiment/ui";
 import { RefreshCw, Zap, Users, Monitor } from "lucide-react";
 
 type GlobalStats = {
@@ -49,29 +49,33 @@ export default function PerformancePage() {
           <Users size={18} color="var(--color-accent)" />
           <h2 style={{ fontSize: "1.1rem", fontWeight: 600 }}>Global Averages (Last 1000 Events)</h2>
         </div>
-        <div className="grid">
-          <VitalCard 
-            label="LCP" 
-            value={globalStats?.LCP} 
-            description="Largest Contentful Paint" 
-            unit="ms"
-            thresholds={{ good: 2500, poor: 4000 }}
-          />
-          <VitalCard 
-            label="INP" 
-            value={globalStats?.INP} 
-            description="Interaction to Next Paint" 
-            unit="ms"
-            thresholds={{ good: 200, poor: 500 }}
-          />
-          <VitalCard 
-            label="CLS" 
-            value={globalStats?.CLS} 
-            description="Cumulative Layout Shift" 
-            unit=""
-            thresholds={{ good: 0.1, poor: 0.25 }}
-          />
-        </div>
+        {loading && !globalStats ? (
+          <Loader label="Calculating performance benchmarks..." />
+        ) : (
+          <div className="grid">
+            <VitalCard 
+              label="LCP" 
+              value={globalStats?.LCP} 
+              description="Largest Contentful Paint" 
+              unit="ms"
+              thresholds={{ good: 2500, poor: 4000 }}
+            />
+            <VitalCard 
+              label="INP" 
+              value={globalStats?.INP} 
+              description="Interaction to Next Paint" 
+              unit="ms"
+              thresholds={{ good: 200, poor: 500 }}
+            />
+            <VitalCard 
+              label="CLS" 
+              value={globalStats?.CLS} 
+              description="Cumulative Layout Shift" 
+              unit=""
+              thresholds={{ good: 0.1, poor: 0.25 }}
+            />
+          </div>
+        )}
       </div>
 
       <div style={{ marginTop: 48 }}>

@@ -4,4 +4,5 @@ export { Card } from "./primitives/Card";
 export { Input } from "./primitives/Input";
 export { Modal } from "./primitives/Modal";
 export { Switch } from "./primitives/Switch";
+export { Loader } from "./primitives/Loader";
 export * from "./primitives/Table";

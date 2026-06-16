@@ -30,7 +30,7 @@ button {
 /* Layout Primitives */
 .app-shell {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 260px 1fr;
   min-height: 100vh;
 }
 
@@ -38,6 +38,31 @@ button {
   padding: var(--space-8) var(--space-12);
   max-width: 1200px;
   width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .app-shell {
+    grid-template-columns: 80px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+  
+  .ui-sidebar {
+    display: none; /* We'll need a mobile bottom nav or drawer later */
+  }
+
+  .main-content {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stack {

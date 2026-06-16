@@ -6,13 +6,14 @@ import { z } from "zod";
 import { createExperiment, fetchExperiments } from "../../../../lib/apiClient";
 import { track } from "../../../../lib/analytics";
 import type { Experiment } from "@experiment/schemas";
-import { Button, Table, THead, TBody, TR, TH, TD, Badge, Modal, Input } from "@experiment/ui";
-import { Plus, BarChart2, Calendar, MoreHorizontal, ExternalLink } from "lucide-react";
+import { Button, Table, THead, TBody, TR, TH, TD, Badge, Modal, Input, Loader } from "@experiment/ui";
+import { Plus, BarChart2, Calendar, MoreHorizontal, ExternalLink, Search } from "lucide-react";
 
 const keySchema = z.string().regex(/^[a-z0-9_]+$/i);
 
 export default function ExperimentsPage() {
   const [items, setItems] = useState<Experiment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
@@ -20,7 +21,10 @@ export default function ExperimentsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchExperiments().then(setItems);
+    fetchExperiments().then((data) => {
+      setItems(data);
+      setLoading(false);
+    });
   }, []);
 
   const onCreate = async () => {
@@ -68,52 +72,59 @@ export default function ExperimentsPage() {
         </Button>
       </header>
 
-      <Table>
-        <THead>
-          <TR>
-            <TH>Name</TH>
-            <TH>Key</TH>
-            <TH>Status</TH>
-            <TH>Created</TH>
-            <TH></TH>
-          </TR>
-        </THead>
-        <TBody>
-          {items.map((experiment) => (
-            <TR key={experiment.id}>
-              <TD>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <BarChart2 size={18} color="var(--color-text-dim)" />
-                  <span style={{ fontWeight: 600 }}>{experiment.name}</span>
-                </div>
-              </TD>
-              <TD><code>{experiment.key}</code></TD>
-              <TD>{getStatusBadge(experiment.status)}</TD>
-              <TD>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-text-dim)", fontSize: "0.85rem" }}>
-                  <Calendar size={14} />
-                  {new Date(experiment.createdAt).toLocaleDateString()}
-                </div>
-              </TD>
-              <TD>
-                <Link href={`/app/experiments/${experiment.id}`}>
-                  <Button variant="secondary" style={{ padding: "6px 12px", fontSize: "0.85rem" }}>
-                    View Results
-                    <ExternalLink size={14} style={{ marginLeft: 8 }} />
-                  </Button>
-                </Link>
-              </TD>
-            </TR>
-          ))}
-          {items.length === 0 && (
+      {loading ? (
+        <Loader label="Fetching experiments..." />
+      ) : (
+        <Table>
+          <THead>
             <TR>
-              <TD colSpan={5} style={{ textAlign: "center", padding: "48px", color: "var(--color-text-dim)" }}>
-                No experiments found. Create your first one to get started!
-              </TD>
+              <TH>Name</TH>
+              <TH>Key</TH>
+              <TH>Status</TH>
+              <TH>Created</TH>
+              <TH></TH>
             </TR>
-          )}
-        </TBody>
-      </Table>
+          </THead>
+          <TBody>
+            {items.map((experiment) => (
+              <TR key={experiment.id}>
+                <TD>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <BarChart2 size={18} color="var(--color-text-dim)" />
+                    <span style={{ fontWeight: 600 }}>{experiment.name}</span>
+                  </div>
+                </TD>
+                <TD><code>{experiment.key}</code></TD>
+                <TD>{getStatusBadge(experiment.status)}</TD>
+                <TD>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-text-dim)", fontSize: "0.85rem" }}>
+                    <Calendar size={14} />
+                    {new Date(experiment.createdAt).toLocaleDateString()}
+                  </div>
+                </TD>
+                <TD>
+                  <Link href={`/app/experiments/${experiment.id}`}>
+                    <Button variant="secondary" style={{ padding: "6px 12px", fontSize: "0.85rem" }}>
+                      View Results
+                      <ExternalLink size={14} style={{ marginLeft: 8 }} />
+                    </Button>
+                  </Link>
+                </TD>
+              </TR>
+            ))}
+            {items.length === 0 && (
+              <TR>
+                <TD colSpan={5} style={{ textAlign: "center", padding: "48px", color: "var(--color-text-dim)" }}>
+                  <div className="stack" style={{ alignItems: "center", gap: 8 }}>
+                    <Search size={32} />
+                    <p>No experiments found. Create your first one to get started!</p>
+                  </div>
+                </TD>
+              </TR>
+            )}
+          </TBody>
+        </Table>
+      )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Experiment">
         <div className="stack" style={{ marginTop: 16 }}>
