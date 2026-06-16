@@ -29,6 +29,7 @@ export async function GET(req: Request) {
       variants: e.variants,
       rollout: e.rollout,
       status: e.status,
+      metrics: e.metrics || [],
       rules: e.rules || [],
       winningVariantId: e.winningVariantId
     }))
