@@ -27,7 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <OrganizationSwitcher hidePersonal />
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             style={{ background: "transparent", border: "none", color: "var(--color-text)", cursor: "pointer" }}
