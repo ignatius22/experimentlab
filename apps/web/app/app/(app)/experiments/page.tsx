@@ -17,6 +17,7 @@ export default function ExperimentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
+  const [metric, setMetric] = useState("conversion_rate");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,18 +30,19 @@ export default function ExperimentsPage() {
 
   const onCreate = async () => {
     setError(null);
-    if (name.trim().length < 2 || !keySchema.safeParse(key).success) {
-      setError("Invalid input. Name > 2 chars, Key alphanumeric.");
+    if (name.trim().length < 2 || !keySchema.safeParse(key).success || metric.trim().length < 2) {
+      setError("Invalid input. Name and Metric > 2 chars, Key alphanumeric.");
       return;
     }
 
     setPending(true);
     try {
-      const created = await createExperiment({ name, key, metrics: ["signup_rate"] });
+      const created = await createExperiment({ name, key, metrics: [metric] });
       setItems([created, ...items]);
       track("experiment_created", { id: created.id, key: created.key });
       setName("");
       setKey("");
+      setMetric("conversion_rate");
       setIsModalOpen(false);
     } catch {
       setError("Could not create experiment. Retry.");
@@ -133,6 +135,9 @@ export default function ExperimentsPage() {
           
           <label style={{ fontSize: "0.85rem", fontWeight: 500, marginTop: 8 }}>Unique Key</label>
           <Input value={key} onChange={(e) => setKey(e.target.value)} placeholder="e.g. homepage_hero" />
+
+          <label style={{ fontSize: "0.85rem", fontWeight: 500, marginTop: 8 }}>Target Metric</label>
+          <Input value={metric} onChange={(e) => setMetric(e.target.value)} placeholder="e.g. conversion_rate" />
           
           {error && <p style={{ color: "var(--color-danger)", fontSize: "0.85rem" }}>{error}</p>}
           
