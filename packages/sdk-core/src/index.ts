@@ -81,12 +81,20 @@ export class ExperimentClient {
   private flushTimer: any = null;
   private assignments: Record<string, string> = {};
   private STORAGE_KEY = "exp_assignments";
+  private onEvent?: (event: Event) => void;
 
-  constructor(options: { publishableKey: string; userId: string; baseUrl?: string; context?: Record<string, any> }) {
+  constructor(options: { 
+    publishableKey: string; 
+    userId: string; 
+    baseUrl?: string; 
+    context?: Record<string, any>;
+    onEvent?: (event: Event) => void;
+  }) {
     this.publishableKey = options.publishableKey;
     this.userId = options.userId;
     this.baseUrl = options.baseUrl || "";
     this.context = options.context || {};
+    this.onEvent = options.onEvent;
 
     if (typeof window !== "undefined") {
       this.loadAssignments();
@@ -239,6 +247,11 @@ export class ExperimentClient {
 
   private enqueue(event: Event) {
     this.eventQueue.push(event);
+
+    if (this.onEvent) {
+      this.onEvent(event);
+    }
+
     if (this.eventQueue.length >= 10) {
       this.flush();
     } else if (!this.flushTimer) {
