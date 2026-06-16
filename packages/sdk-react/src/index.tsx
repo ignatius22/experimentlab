@@ -61,5 +61,5 @@ export function useManifest() {
     () => client ? client.getSnapshot() : EMPTY_STATE,
     () => client ? client.getSnapshot() : EMPTY_STATE
   );
-  return state.manifest;
+  return { manifest: state.manifest, loading: state.loading };
 }

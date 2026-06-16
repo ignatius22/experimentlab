@@ -10,7 +10,7 @@ import { Activity, Beaker, CheckCircle2, XCircle, Zap } from "lucide-react";
 export default function ProofPage() {
   const vitals = useSyncExternalStore(subscribeVitals, getVitals, getVitals);
   const events = useSyncExternalStore(subscribeEvents, getEvents, getEvents);
-  const manifest = useManifest();
+  const { manifest, loading } = useManifest();
   const track = useTrack();
   
   const [activeExperimentKey, setActiveExperimentKey] = useState<string | null>(null);
@@ -20,8 +20,17 @@ export default function ProofPage() {
     manifest?.experiments.flatMap(exp => exp.metrics || []) || []
   ));
 
-  if (!manifest) {
+  if (loading && !manifest) {
     return <Loader label="Initializing SDK manifest..." />;
+  }
+
+  if (!manifest) {
+    return (
+      <div style={{ textAlign: "center", padding: "48px", color: "var(--color-danger)" }}>
+        <h2>Failed to load SDK Manifest</h2>
+        <p>There was an error fetching your feature flags. Please check your network connection or try refreshing the page.</p>
+      </div>
+    );
   }
 
   return (

@@ -198,12 +198,12 @@
 }
 
 .ui-sidebar-link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
 }
 
 .ui-sidebar-link-active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
   font-weight: 600;
 }
