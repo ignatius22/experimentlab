@@ -145,6 +145,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
                   <TH>Conversions</TH>
                   <TH>Conv. Rate</TH>
                   <TH>Uplift</TH>
+                  <TH>P-Value</TH>
                   <TH></TH>
                 </TR>
               </THead>
@@ -173,10 +174,20 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
                       <TD>{stats ? (stats.rate * 100).toFixed(2) : "0.00"}%</TD>
                       <TD>
                         {stats?.uplift !== null && stats?.uplift !== undefined ? (
-                          <span style={{ color: stats.uplift > 0 ? "var(--color-success)" : "var(--color-danger)", fontWeight: 600 }}>
-                            {stats.uplift > 0 ? "+" : ""}{(stats.uplift * 100).toFixed(1)}%
-                          </span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ color: stats.uplift > 0 ? "var(--color-success)" : "var(--color-danger)", fontWeight: 600 }}>
+                              {stats.uplift > 0 ? "+" : ""}{(stats.uplift * 100).toFixed(1)}%
+                            </span>
+                            {stats.isSignificant && <Badge variant="success" style={{ fontSize: "0.6rem" }}>Sig</Badge>}
+                          </div>
                         ) : "—"}
+                      </TD>
+                      <TD>
+                         {stats?.pValue !== null && stats?.pValue !== undefined ? (
+                           <span style={{ color: stats.pValue < 0.05 ? "var(--color-success)" : "var(--color-text-dim)" }}>
+                             {stats.pValue.toFixed(3)}
+                           </span>
+                         ) : "—"}
                       </TD>
                       <TD>
                         {!isControl && !isCompleted && isRunning && stats && stats.isSignificant && (
