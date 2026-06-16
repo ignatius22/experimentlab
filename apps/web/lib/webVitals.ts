@@ -1,4 +1,5 @@
 import { onCLS, onINP, onLCP } from "web-vitals";
+import { track } from "./analytics";
 
 type VitalsState = {
   CLS: number | null;
@@ -12,6 +13,10 @@ let initialized = false;
 
 function update(metric: keyof VitalsState, value: number) {
   vitals = { ...vitals, [metric]: Number(value.toFixed(3)) };
+  
+  // Track vital as a real event for persistence
+  track(`vital_${metric.toLowerCase()}`, { value: Number(value.toFixed(3)) });
+  
   listeners.forEach((listener) => listener());
 }
 
