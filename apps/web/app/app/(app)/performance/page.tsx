@@ -33,7 +33,7 @@ export default function PerformancePage() {
 
   return (
     <section className="stack">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <header className="page-header">
         <div>
           <h1 style={{ fontSize: "1.8rem" }}>Performance</h1>
           <p style={{ color: "var(--color-text-muted)" }}>Live Core Web Vitals monitoring from your users.</p>

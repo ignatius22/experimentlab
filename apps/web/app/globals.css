@@ -89,3 +89,20 @@ button {
 .badge-warning { background: var(--color-warning-soft); color: var(--color-warning); }
 .badge-danger { background: var(--color-danger-soft); color: var(--color-danger); }
 .badge-neutral { background: var(--color-surface-hover); color: var(--color-text-muted); }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    flex-direction: column;
+  }
+  .page-header button {
+    width: 100%;
+  }
+}

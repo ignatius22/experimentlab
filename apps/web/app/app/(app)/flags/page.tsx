@@ -62,7 +62,7 @@ export default function FlagsPage() {
 
   return (
     <section className="stack">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-6)" }}>
+      <header className="page-header">
         <div>
           <h1 style={{ fontSize: "1.8rem" }}>Feature Flags</h1>
           <p style={{ color: "var(--color-text-muted)" }}>Control feature availability across your application.</p>

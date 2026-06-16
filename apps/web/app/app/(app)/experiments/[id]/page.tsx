@@ -90,7 +90,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <section className="stack" style={{ gap: "var(--space-8)" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <header className="page-header">
         <div className="stack" style={{ gap: "var(--space-2)" }}>
           <div>
             <Link href="/app/experiments" className="ui-sidebar-link" style={{ padding: 0, color: "var(--color-text-dim)", background: "transparent", fontSize: "0.9rem" }}>
@@ -99,7 +99,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
             </Link>
           </div>
           <h1 style={{ fontSize: "2.2rem", marginTop: 8 }}>{experiment.name}</h1>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <code className="ui-badge ui-badge-neutral" style={{ padding: "4px 8px", borderRadius: 4, fontFamily: "monospace" }}>{experiment.key}</code>
             {isRunning && <Badge variant="success">Live</Badge>}
             {isPaused && <Badge variant="warning">Paused</Badge>}
@@ -108,21 +108,21 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 12 }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", width: "100%", justifyContent: "flex-end" }}>
           {isDraft && (
-            <Button onClick={() => updateStatus("active")} disabled={actionPending}>
+            <Button onClick={() => updateStatus("active")} disabled={actionPending} style={{ width: "auto" }}>
               <Play size={16} style={{ marginRight: 8 }} />
               Start Experiment
             </Button>
           )}
           {isRunning && (
-            <Button variant="warning" onClick={() => updateStatus("paused")} disabled={actionPending}>
+            <Button variant="warning" onClick={() => updateStatus("paused")} disabled={actionPending} style={{ width: "auto" }}>
               <Pause size={16} style={{ marginRight: 8 }} />
               Pause
             </Button>
           )}
           {isPaused && (
-            <Button onClick={() => updateStatus("active")} disabled={actionPending}>
+            <Button onClick={() => updateStatus("active")} disabled={actionPending} style={{ width: "auto" }}>
               <Play size={16} style={{ marginRight: 8 }} />
               Resume
             </Button>

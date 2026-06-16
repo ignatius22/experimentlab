@@ -35,9 +35,11 @@ export default function ProofPage() {
 
   return (
     <section className="stack" style={{ gap: "var(--space-8)" }}>
-      <header>
-        <h1 style={{ fontSize: "1.8rem" }}>Proof Dashboard</h1>
-        <p style={{ color: "var(--color-text-muted)" }}>Developer validation tool for SDK and event ingestion.</p>
+      <header className="page-header">
+        <div>
+          <h1 style={{ fontSize: "1.8rem" }}>Proof Dashboard</h1>
+          <p style={{ color: "var(--color-text-muted)" }}>Developer validation tool for SDK and event ingestion.</p>
+        </div>
       </header>
       
       <div className="grid">

@@ -45,7 +45,7 @@ export default function AnalyticsPage() {
 
   return (
     <section className="stack">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <header className="page-header">
         <div>
           <h1 style={{ fontSize: "1.8rem" }}>Event Stream</h1>
           <p style={{ color: "var(--color-text-muted)" }}>Real-time feed of all experiments and flag evaluations.</p>

@@ -63,7 +63,7 @@ export default function ExperimentsPage() {
 
   return (
     <section className="stack">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-6)" }}>
+      <header className="page-header">
         <div>
           <h1 style={{ fontSize: "1.8rem" }}>Experiments</h1>
           <p style={{ color: "var(--color-text-muted)" }}>Manage and monitor your product A/B tests.</p>
