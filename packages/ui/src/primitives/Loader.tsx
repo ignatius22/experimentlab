@@ -12,12 +12,8 @@ export function Loader({ size = 24, label }: { size?: number, label?: string }) 
       gap: 12,
       color: "var(--color-text-dim)"
     }}>
-      <Loader2 size={size} className="spin" />
+      <Loader2 size={size} className="ui-spin" />
       {label && <p style={{ fontSize: "0.9rem" }}>{label}</p>}
-      <style jsx>{`
-        .spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 }

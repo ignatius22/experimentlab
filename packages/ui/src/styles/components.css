@@ -207,3 +207,7 @@
   color: white;
   font-weight: 600;
 }
+
+/* Utilities */
+.ui-spin { animation: ui-spin 1s linear infinite; }
+@keyframes ui-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
