@@ -77,7 +77,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           padding: 24px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .mobile-header {
             display: flex;
           }

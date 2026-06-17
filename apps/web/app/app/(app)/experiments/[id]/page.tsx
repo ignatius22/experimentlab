@@ -6,7 +6,7 @@ import { useExperiment } from "@experiment/sdk-react";
 import { fetchExperiments } from "../../../../../lib/apiClient";
 import type { Experiment } from "@experiment/schemas";
 import type { StatsResult } from "../../../../../lib/stats";
-import { Button, Badge, Card, Table, THead, TBody, TR, TH, TD, Loader } from "@experiment/ui";
+import { Button, Badge, Card, Table, THead, TBody, TR, TH, TD, Loader, Modal, Input } from "@experiment/ui";
 import { 
   ArrowLeft, 
   Play, 
@@ -16,8 +16,12 @@ import {
   Activity, 
   Target, 
   Clock,
-  Info
+  Info,
+  Edit2,
+  Trash2,
+  Plus
 } from "lucide-react";
+import type { Rule } from "@experiment/schemas";
 
 interface ExperimentResults {
   primaryMetric: string;
@@ -30,6 +34,10 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
   const [results, setResults] = useState<ExperimentResults | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionPending, setActionPending] = useState(false);
+
+  // Rules Modal State
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [editingRules, setEditingRules] = useState<Rule[]>([]);
 
   const loadData = async (experimentId: string) => {
     const [exp, res] = await Promise.all([
@@ -72,6 +80,27 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variantId })
       });
+      await loadData(id);
+    } finally {
+      setActionPending(false);
+    }
+  };
+
+  const openRulesModal = () => {
+    setEditingRules(experiment?.rules as Rule[] || []);
+    setIsRulesModalOpen(true);
+  };
+
+  const saveRules = async () => {
+    if (!id) return;
+    setActionPending(true);
+    try {
+      await fetch(`/api/experiments/${id}/rules`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rules: editingRules })
+      });
+      setIsRulesModalOpen(false);
       await loadData(id);
     } finally {
       setActionPending(false);
@@ -209,9 +238,15 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
           </Card>
 
           <Card>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "var(--space-4)" }}>
-              <Target size={20} color="var(--color-accent)" />
-              <h3>Targeting Rules</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <Target size={20} color="var(--color-accent)" />
+                <h3>Targeting Rules</h3>
+              </div>
+              <Button variant="secondary" onClick={openRulesModal} style={{ padding: "6px 12px", fontSize: "0.85rem" }}>
+                <Edit2 size={14} style={{ marginRight: 6 }} />
+                Edit Rules
+              </Button>
             </div>
             <div className="stack" style={{ gap: 12 }}>
               {(!experiment.rules || (experiment.rules as any[]).length === 0) ? (
@@ -299,6 +334,89 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
           }
         }
       `}</style>
+
+      <Modal isOpen={isRulesModalOpen} onClose={() => setIsRulesModalOpen(false)} title="Edit Targeting Rules">
+        <div className="stack" style={{ marginTop: 16 }}>
+          <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
+            Users must match ALL of these rules to be included in the experiment.
+          </p>
+          
+          <div className="stack" style={{ gap: 12, marginTop: 16 }}>
+            {editingRules.map((rule, idx) => (
+              <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <Input 
+                  value={rule.attribute} 
+                  onChange={e => {
+                    const newRules = [...editingRules];
+                    newRules[idx].attribute = e.target.value;
+                    setEditingRules(newRules);
+                  }}
+                  placeholder="Attribute (e.g. plan)"
+                  style={{ flex: 1 }}
+                />
+                <select 
+                  value={rule.operator}
+                  onChange={e => {
+                    const newRules = [...editingRules];
+                    newRules[idx].operator = e.target.value as any;
+                    setEditingRules(newRules);
+                  }}
+                  className="ui-input"
+                  style={{ flex: 1 }}
+                >
+                  <option value="eq">Equals</option>
+                  <option value="neq">Not Equals</option>
+                  <option value="contains">Contains</option>
+                  <option value="in">In (comma separated)</option>
+                  <option value="nin">Not In</option>
+                </select>
+                <Input 
+                  value={String(rule.value || "")} 
+                  onChange={e => {
+                    const newRules = [...editingRules];
+                    // Very simple parsing for "in" operators (array of strings)
+                    if (newRules[idx].operator === "in" || newRules[idx].operator === "nin") {
+                       newRules[idx].value = e.target.value.split(",").map(s => s.trim());
+                    } else {
+                       newRules[idx].value = e.target.value;
+                    }
+                    setEditingRules(newRules);
+                  }}
+                  placeholder="Value"
+                  style={{ flex: 1 }}
+                />
+                <button 
+                  onClick={() => setEditingRules(editingRules.filter((_, i) => i !== idx))}
+                  style={{ background: "transparent", border: "none", color: "var(--color-danger)", cursor: "pointer", padding: 8 }}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+            
+            <Button 
+              variant="secondary" 
+              onClick={() => setEditingRules([...editingRules, { attribute: "", operator: "eq", value: "" }])}
+              style={{ width: "fit-content", marginTop: 8 }}
+            >
+              <Plus size={16} style={{ marginRight: 8 }} />
+              Add Rule
+            </Button>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
+            <Button 
+              variant="secondary"
+              onClick={() => setIsRulesModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={saveRules} disabled={actionPending}>
+              {actionPending ? "Saving..." : "Save Rules"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </section>
   );
 }
