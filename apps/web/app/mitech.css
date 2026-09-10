@@ -1,0 +1,156 @@
+/* ==========================================================================
+   MITECH PREMIUM ENTERPRISE IT DESIGN SYSTEM (Tailored for ExperimentLab)
+   ========================================================================== */
+
+:root {
+  --mitech-primary: #086ad8;
+  --mitech-primary-hover: #0756b3;
+  --mitech-secondary: #002fa6;
+  --mitech-heading: #111827;
+  --mitech-body: #4b5563;
+  --mitech-light-bg: #f8f9fa;
+  --mitech-gray-bg: #f6f8fb;
+  --mitech-dark-bg: #090e1a;
+  --mitech-border: #e5e7eb;
+}
+
+/* Typography & Base */
+.mitech-hero-wrap {
+  background: linear-gradient(135deg, #f8faff 0%, #eef4ff 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 90px 0 100px;
+}
+
+.mitech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(8, 106, 216, 0.08);
+  color: var(--mitech-primary);
+  border: 1px solid rgba(8, 106, 216, 0.2);
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mitech-heading-hero {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--mitech-heading);
+  letter-spacing: -0.03em;
+}
+
+.mitech-highlight {
+  color: var(--mitech-primary);
+  position: relative;
+}
+
+.mitech-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--mitech-primary);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 28px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(8, 106, 216, 0.4);
+  transition: all 0.25s ease;
+  text-decoration: none !important;
+}
+.mitech-btn-primary:hover {
+  background-color: var(--mitech-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(8, 106, 216, 0.5);
+}
+
+.mitech-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--mitech-heading) !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 28px;
+  border-radius: 8px;
+  border: 2px solid #d1d5db;
+  transition: all 0.25s ease;
+  text-decoration: none !important;
+}
+.mitech-btn-outline:hover {
+  border-color: var(--mitech-heading);
+  background-color: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+/* Feature Cards (Large Box Images) */
+.mitech-box-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.mitech-box-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(8, 106, 216, 0.12);
+  border-color: rgba(8, 106, 216, 0.3);
+}
+
+.mitech-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: rgba(8, 106, 216, 0.08);
+  color: var(--mitech-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Counter Bar */
+.mitech-fun-fact {
+  background: var(--mitech-secondary);
+  color: #ffffff;
+  padding: 60px 0;
+}
+.mitech-counter-num {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+  font-family: monospace;
+}
+.mitech-counter-title {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Pricing Table */
+.mitech-pricing-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 40px 32px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.mitech-pricing-popular {
+  border: 2px solid var(--mitech-primary);
+  box-shadow: 0 20px 40px rgba(8, 106, 216, 0.15);
+  transform: scale(1.03);
+}

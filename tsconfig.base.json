@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "es2022"],
+    "strict": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@experiment/schemas": ["packages/schemas/src/index.ts"],
+      "@experiment/ui": ["packages/ui/src/index.ts"],
+      "@experiment/db": ["packages/db/src/index.ts"],
+      "@experiment/sdk-core": ["packages/sdk-core/src/index.ts"],
+      "@experiment/sdk-react": ["packages/sdk-react/src/index.tsx"]
+    }
+  }
+}

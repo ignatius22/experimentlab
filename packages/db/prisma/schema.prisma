@@ -1,0 +1,120 @@
+// Prisma Schema for Self-Hosted ExperimentLab
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id               String                @id @default(cuid())
+  name             String
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  experiments      Experiment[]
+  featureFlags     FeatureFlag[]
+  users            User[]
+  apiKeys          ApiKey[]
+  ingestionBatches EventIngestionBatch[]
+}
+
+model EventIngestionBatch {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  eventCount     Int
+  status         String       @default("reserved")
+  createdAt      DateTime     @default(now())
+  processedAt    DateTime?
+
+  @@index([organizationId, status])
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String
+  name           String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model ApiKey {
+  id             String       @id @default(cuid())
+  name           String       @default("Untitled key")
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  keyHash        String       @unique
+  type           String // "client" | "server"
+  createdAt      DateTime     @default(now())
+  revokedAt      DateTime?
+
+  @@index([organizationId])
+}
+
+model Experiment {
+  id               String       @id @default(cuid())
+  name             String
+  key              String
+  status           String       @default("draft") // draft, running, active, paused, completed
+  variants         Json // Array of variants with weights
+  metrics          String[] // Array of metric keys
+  rollout          Int          @default(100)
+  rules            Json? // Target rules
+  winningVariantId String?
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+}
+
+model FeatureFlag {
+  id             String       @id @default(cuid())
+  name           String
+  key            String
+  description    String?
+  enabled        Boolean      @default(false)
+  rules          Json? // Targeting rules
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+}
+
+model Event {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  type           String // exposure, conversion, vital, etc.
+  name           String
+  variantId      String?
+  payload        Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([name])
+}
+
+model Metric {
+  id             String   @id @default(cuid())
+  organizationId String
+  key            String
+  name           String
+  type           String // count, sum, average
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, key])
+}
