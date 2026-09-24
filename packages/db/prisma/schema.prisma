@@ -13,6 +13,7 @@ datasource db {
 model Organization {
   id               String                @id @default(cuid())
   name             String
+  plan             String                @default("community")
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
   experiments      Experiment[]
@@ -26,6 +27,7 @@ model EventIngestionBatch {
   id             String       @id
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingPeriod  DateTime
   eventCount     Int
   status         String       @default("reserved")
   createdAt      DateTime     @default(now())
@@ -74,6 +76,7 @@ model Experiment {
   updatedAt        DateTime     @updatedAt
 
   @@unique([organizationId, key])
+  @@unique([id, organizationId])
   @@index([organizationId])
 }
 
@@ -90,6 +93,7 @@ model FeatureFlag {
   updatedAt      DateTime     @updatedAt
 
   @@unique([organizationId, key])
+  @@unique([id, organizationId])
   @@index([organizationId])
 }
 
@@ -105,6 +109,9 @@ model Event {
 
   @@index([organizationId])
   @@index([name])
+  @@index([organizationId, type, name])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, userId])
 }
 
 model Metric {

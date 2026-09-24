@@ -35,7 +35,7 @@ export async function GET(req: Request) {
       prisma.experiment.findMany({
         where: isServerKey
           ? { organizationId }
-          : { organizationId, status: { in: ["active", "completed"] } }
+          : { organizationId, status: { in: ["active", "running", "completed"] } }
       })
     ]);
 

@@ -24,7 +24,12 @@ export async function PUT(
 
   try {
     const updated = await prisma.experiment.update({
-      where: { id, organizationId: orgId },
+      where: {
+        id_organizationId: {
+          id,
+          organizationId: orgId
+        }
+      },
       data: { rules: parsed.data as any }
     });
 

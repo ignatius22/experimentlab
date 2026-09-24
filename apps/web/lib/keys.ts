@@ -1,15 +1,20 @@
 import crypto from "crypto";
 import { prisma } from "@experiment/db";
 
-export const API_KEY_PREFIX = "exp_live_";
+export const CLIENT_API_KEY_PREFIX = "exp_client_";
+export const SERVER_API_KEY_PREFIX = "exp_server_";
+export const LEGACY_API_KEY_PREFIX = "exp_live_";
+export const API_KEY_PREFIX = LEGACY_API_KEY_PREFIX;
+export const VALID_KEY_PREFIXES = [CLIENT_API_KEY_PREFIX, SERVER_API_KEY_PREFIX, LEGACY_API_KEY_PREFIX];
 
 export function hashApiKey(key: string): string {
   return crypto.createHash("sha256").update(key).digest("hex");
 }
 
 export function generateApiKey(type: "client" | "server" = "client") {
+  const prefix = type === "server" ? SERVER_API_KEY_PREFIX : CLIENT_API_KEY_PREFIX;
   const randomBytes = crypto.randomBytes(24).toString("hex");
-  const rawKey = `${API_KEY_PREFIX}${randomBytes}`;
+  const rawKey = `${prefix}${randomBytes}`;
   const keyHash = hashApiKey(rawKey);
 
   return {
@@ -25,7 +30,8 @@ export async function validateApiKey(rawKey: string | null | undefined) {
   }
 
   const trimmed = rawKey.trim().replace(/^Bearer\s+/i, "");
-  if (!trimmed.startsWith(API_KEY_PREFIX)) {
+  const hasValidPrefix = VALID_KEY_PREFIXES.some((prefix) => trimmed.startsWith(prefix));
+  if (!hasValidPrefix) {
     return null;
   }
 

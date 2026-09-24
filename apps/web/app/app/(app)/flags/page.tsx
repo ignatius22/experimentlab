@@ -53,17 +53,20 @@ export default function FlagsPage() {
     fetchFlags();
   }, []);
 
-  const toggleFlag = async (id: string, currentEnabled: boolean) => {
+  const toggleFlag = async (flag: Pick<FlagItem, "id" | "key" | "enabled">) => {
+    const nextEnabled = !flag.enabled;
     setFlags((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, enabled: !currentEnabled } : f))
+      prev.map((f) => (f.id === flag.id ? { ...f, enabled: nextEnabled } : f))
     );
 
     try {
-      await fetch(`/api/flags/${id}`, {
-        method: "PATCH",
+      const response = await fetch(`/api/flags/${encodeURIComponent(flag.key)}/toggle`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !currentEnabled }),
+        body: JSON.stringify({ enabled: nextEnabled }),
       });
+
+      if (!response.ok) throw new Error("Failed to toggle flag");
     } catch (err) {
       fetchFlags();
     }
@@ -205,7 +208,7 @@ export default function FlagsPage() {
                             type="checkbox"
                             role="switch"
                             checked={flag.enabled}
-                            onChange={() => toggleFlag(flag.id, flag.enabled)}
+                            onChange={() => toggleFlag(flag)}
                             style={{ cursor: "pointer", width: 38, height: 20 }}
                           />
                           <span className={`badge rounded-pill fw-bold ${flag.enabled ? "badge-success-light" : "bg-light text-muted"}`} style={{ fontSize: "0.75rem" }}>

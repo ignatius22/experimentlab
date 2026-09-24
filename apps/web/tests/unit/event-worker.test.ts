@@ -29,4 +29,23 @@ describe("event worker", () => {
     await flushEventJobs([{ batchId: "done", organizationId: "org", events: [{ userId: "u", type: "track", name: "x" }] }]);
     expect(mocks.createMany).not.toHaveBeenCalled();
   });
+
+  it("safely handles malformed timestamps without crashing the batch", async () => {
+    const tx = { event: { createMany: mocks.createMany }, eventIngestionBatch: { findMany: mocks.batchFindMany, updateMany: mocks.batchUpdateMany } };
+    mocks.transaction.mockImplementation((callback) => callback(tx));
+    mocks.batchFindMany.mockResolvedValue([{ id: "b-invalid", organizationId: "org", eventCount: 1 }]);
+
+    const jobs = [{
+      batchId: "b-invalid",
+      organizationId: "org",
+      events: [{ userId: "u", type: "track", name: "x", timestamp: "not-a-valid-date-string" }]
+    }];
+
+    await flushEventJobs(jobs);
+
+    expect(mocks.createMany).toHaveBeenCalledTimes(1);
+    const createdEvent = mocks.createMany.mock.calls[0][0].data[0];
+    expect(createdEvent.createdAt).toBeInstanceOf(Date);
+    expect(isNaN(createdEvent.createdAt.getTime())).toBe(false);
+  });
 });

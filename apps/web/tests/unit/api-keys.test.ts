@@ -11,14 +11,18 @@ vi.mock("@experiment/db", () => ({
 }));
 
 describe("API Key Utilities", () => {
-  it("generates a secure key with the exp_live_ prefix and valid SHA-256 hash", () => {
-    const { rawKey, keyHash, type } = generateApiKey("client");
+  it("generates a secure key with distinct client and server prefixes and valid SHA-256 hash", () => {
+    const clientKey = generateApiKey("client");
+    expect(clientKey.rawKey.startsWith("exp_client_")).toBe(true);
+    expect(clientKey.length ?? clientKey.rawKey.length).toBeGreaterThan(20);
+    expect(clientKey.type).toBe("client");
+    expect(clientKey.keyHash).toBe(hashApiKey(clientKey.rawKey));
+    expect(clientKey.keyHash).toHaveLength(64);
 
-    expect(rawKey.startsWith(API_KEY_PREFIX)).toBe(true);
-    expect(rawKey.length).toBeGreaterThan(20);
-    expect(type).toBe("client");
-    expect(keyHash).toBe(hashApiKey(rawKey));
-    expect(keyHash).toHaveLength(64); // SHA-256 hex length
+    const serverKey = generateApiKey("server");
+    expect(serverKey.rawKey.startsWith("exp_server_")).toBe(true);
+    expect(serverKey.type).toBe("server");
+    expect(serverKey.keyHash).toBe(hashApiKey(serverKey.rawKey));
   });
 
   it("produces deterministic SHA-256 hashes", () => {

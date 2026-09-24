@@ -1,0 +1,2 @@
+ALTER TABLE "Organization"
+ADD COLUMN IF NOT EXISTS "plan" TEXT NOT NULL DEFAULT 'community';

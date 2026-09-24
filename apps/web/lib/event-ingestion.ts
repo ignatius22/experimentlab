@@ -9,7 +9,11 @@ import { getEventQueue, type IngestEvent } from "./event-queue";
  */
 export async function enqueueEventBatch(organizationId: string, events: IngestEvent[]) {
   const batchId = randomUUID();
-  await prisma.eventIngestionBatch.create({ data: { id: batchId, organizationId, eventCount: events.length } });
+  const now = new Date();
+  const billingPeriod = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  await prisma.eventIngestionBatch.create({
+    data: { id: batchId, organizationId, billingPeriod, eventCount: events.length }
+  });
 
   try {
     await getEventQueue().add("event-batch", { batchId, organizationId, events }, { jobId: batchId });

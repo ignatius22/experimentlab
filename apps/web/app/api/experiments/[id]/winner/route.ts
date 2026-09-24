@@ -16,16 +16,24 @@ export async function POST(
   const body = await req.json();
   const { winningVariantId } = body;
 
-  const updated = await prisma.experiment.updateMany({
-    where: {
-      id,
-      organizationId: orgId
-    },
+  const experiment = await prisma.experiment.findUnique({ where: { id } });
+  if (!experiment || experiment.organizationId !== orgId) {
+    return NextResponse.json({ error: "NotFound" }, { status: 404 });
+  }
+
+  const variants = Array.isArray(experiment.variants) ? (experiment.variants as any[]) : [];
+  const variantExists = variants.some((v) => v.id === winningVariantId);
+  if (!variantExists) {
+    return NextResponse.json({ error: "InvalidVariantId: Variant does not exist in this experiment" }, { status: 400 });
+  }
+
+  const updated = await prisma.experiment.update({
+    where: { id },
     data: {
       winningVariantId,
       status: "completed"
     }
   });
 
-  return NextResponse.json({ success: true, updated });
+  return NextResponse.json({ success: true, experiment: updated });
 }

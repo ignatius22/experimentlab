@@ -7,7 +7,8 @@ import { ArrowRight, CircleAlert } from "lucide-react";
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/app";
+  const rawRedirect = searchParams.get("redirect") || "/app";
+  const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/app";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

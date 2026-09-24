@@ -17,6 +17,12 @@ export async function POST(
     return NextResponse.json({ error: "NotFound" }, { status: 404 });
   }
 
+  const variants = Array.isArray(experiment.variants) ? (experiment.variants as any[]) : [];
+  const variantExists = variants.some((v) => v.id === variantId);
+  if (!variantExists) {
+    return NextResponse.json({ error: "InvalidVariantId: Variant does not exist in this experiment" }, { status: 400 });
+  }
+
   const updated = await prisma.experiment.update({
     where: { id },
     data: { 

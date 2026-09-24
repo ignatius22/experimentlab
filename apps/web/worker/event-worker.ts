@@ -12,7 +12,35 @@ export async function flushEventJobs(jobs: EventBatchJob[]) {
     const activeJobs = jobs.filter((job) => activeIds.has(job.batchId));
     if (!activeJobs.length) return;
 
-    await tx.event.createMany({ data: activeJobs.flatMap((job) => job.events.map((event) => ({ organizationId: job.organizationId, userId: event.userId || "anonymous", type: event.type, name: event.name, variantId: event.variantId || null, payload: (event.payload || {}) as any, createdAt: event.timestamp ? new Date(event.timestamp) : new Date() }))) });
+    const eventRecords = activeJobs.flatMap((job) =>
+      job.events
+        .filter((event) => event && typeof event.type === "string" && typeof event.name === "string" && event.type.trim() && event.name.trim())
+        .map((event) => {
+          let eventDate: Date;
+          if (event.timestamp) {
+            const parsed = new Date(event.timestamp);
+            eventDate = !isNaN(parsed.getTime()) ? parsed : new Date();
+          } else {
+            eventDate = new Date();
+          }
+
+          return {
+            organizationId: job.organizationId,
+            userId: typeof event.userId === "string" && event.userId.trim() ? event.userId.trim() : "anonymous",
+            type: event.type.trim(),
+            name: event.name.trim(),
+            variantId: typeof event.variantId === "string" ? event.variantId : null,
+            payload: (event.payload && typeof event.payload === "object" ? event.payload : {}) as any,
+            createdAt: eventDate
+          };
+        })
+    );
+
+    if (eventRecords.length > 0) {
+      await tx.event.createMany({
+        data: eventRecords
+      });
+    }
 
     await tx.eventIngestionBatch.updateMany({ where: { id: { in: [...activeIds] } }, data: { status: "processed", processedAt: new Date() } });
   });

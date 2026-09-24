@@ -25,13 +25,13 @@ describe("manifest API key scopes", () => {
     mocks.experiments.mockResolvedValue([]);
   });
 
-  it("limits client keys to published flags and active/completed experiments", async () => {
+  it("limits client keys to published flags and live/completed experiments", async () => {
     mocks.validateApiKey.mockResolvedValue({ organizationId: "org_1", type: "client" });
     const response = await GET(new Request("http://localhost/api/v1/client/manifest", { headers: { "x-api-key": "exp_live_client" } }));
 
     expect(response.status).toBe(200);
     expect(mocks.flags).toHaveBeenCalledWith(expect.objectContaining({ where: { organizationId: "org_1", enabled: true } }));
-    expect(mocks.experiments).toHaveBeenCalledWith(expect.objectContaining({ where: { organizationId: "org_1", status: { in: ["active", "completed"] } } }));
+    expect(mocks.experiments).toHaveBeenCalledWith(expect.objectContaining({ where: { organizationId: "org_1", status: { in: ["active", "running", "completed"] } } }));
   });
 
   it("allows server keys to fetch the broader trusted-server manifest", async () => {

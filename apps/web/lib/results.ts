@@ -5,33 +5,39 @@ import { Prisma } from "@prisma/client";
 
 type VariantAggregate = { variantId: string | null; exposures: bigint; conversions: bigint };
 
-export async function getExperimentResults(experimentId: string) {
-  const experiment = await prisma.experiment.findUnique({
-    where: { id: experimentId }
+export async function getExperimentResults(experimentId: string, organizationId?: string) {
+  const experiment = await prisma.experiment.findFirst({
+    where: {
+      id: experimentId,
+      ...(organizationId ? { organizationId } : {})
+    }
   });
 
   if (!experiment) throw new Error("Experiment not found");
 
   const variants = experiment.variants as unknown as Variant[];
-  const primaryMetric = experiment.metrics[0] || "conversion";
+  const primaryMetric = (experiment.metrics && experiment.metrics.length > 0) ? experiment.metrics[0] : "conversion";
 
   const aggregates = await prisma.$queryRaw<VariantAggregate[]>(Prisma.sql`
     WITH exposed_users AS (
-      SELECT DISTINCT "variantId", "userId"
+      SELECT "variantId", "userId", MIN("createdAt") AS first_exposed_at
       FROM "Event"
       WHERE "organizationId" = ${experiment.organizationId}
         AND type = 'exposure' AND name = ${experiment.key}
+        AND "variantId" IS NOT NULL
+      GROUP BY "variantId", "userId"
     ), exposure_counts AS (
-      SELECT "variantId", COUNT(*)::bigint AS exposures
-      FROM "Event"
-      WHERE "organizationId" = ${experiment.organizationId}
-        AND type = 'exposure' AND name = ${experiment.key}
+      SELECT "variantId", COUNT(DISTINCT "userId")::bigint AS exposures
+      FROM exposed_users
       GROUP BY "variantId"
     ), conversion_counts AS (
-      SELECT eu."variantId", COUNT(c.id)::bigint AS conversions
+      SELECT eu."variantId", COUNT(DISTINCT c."userId")::bigint AS conversions
       FROM exposed_users eu
-      LEFT JOIN "Event" c ON c."organizationId" = ${experiment.organizationId}
-        AND c."userId" = eu."userId" AND c.type = 'track' AND c.name = ${primaryMetric}
+      INNER JOIN "Event" c ON c."organizationId" = ${experiment.organizationId}
+        AND c."userId" = eu."userId"
+        AND (c.type = 'track' OR c.type = 'conversion')
+        AND (c.name = ${primaryMetric} OR c.name = ${experiment.key})
+        AND c."createdAt" >= eu.first_exposed_at
       GROUP BY eu."variantId"
     )
     SELECT ec."variantId", ec.exposures, COALESCE(cc.conversions, 0)::bigint AS conversions

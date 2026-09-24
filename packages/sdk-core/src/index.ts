@@ -32,6 +32,26 @@ export function evaluateRules(rules: Rule[] | null | undefined, context: Record<
         return Array.isArray(rule.value) && rule.value.includes(attrValue);
       case "nin":
         return Array.isArray(rule.value) && !rule.value.includes(attrValue);
+      case "gt": {
+        const a = Number(attrValue);
+        const b = Number(rule.value);
+        return !isNaN(a) && !isNaN(b) && a > b;
+      }
+      case "gte": {
+        const a = Number(attrValue);
+        const b = Number(rule.value);
+        return !isNaN(a) && !isNaN(b) && a >= b;
+      }
+      case "lt": {
+        const a = Number(attrValue);
+        const b = Number(rule.value);
+        return !isNaN(a) && !isNaN(b) && a < b;
+      }
+      case "lte": {
+        const a = Number(attrValue);
+        const b = Number(rule.value);
+        return !isNaN(a) && !isNaN(b) && a <= b;
+      }
       default:
         return false;
     }
@@ -76,6 +96,7 @@ export interface ExperimentClientOptions {
   baseUrl?: string;
   endpoint?: string;
   context?: Record<string, any>;
+  initialManifest?: ExperimentManifest;
   user?: {
     id: string;
     attributes?: Record<string, any>;
@@ -105,6 +126,11 @@ export class ExperimentClient {
     this.baseUrl = options.baseUrl || options.endpoint || "";
     this.context = options.context || options.user?.attributes || {};
     this.onEvent = options.onEvent;
+
+    if (options.initialManifest) {
+      this.manifest = options.initialManifest;
+      this.state = { manifest: this.manifest, loading: false };
+    }
 
     if (typeof window !== "undefined") {
       this.loadAssignments();
@@ -141,6 +167,7 @@ export class ExperimentClient {
 
   async init() {
     if (this.loading) return;
+    if (!this.baseUrl && typeof window === "undefined") return;
     this.loading = true;
     this.updateState();
     try {
@@ -208,18 +235,29 @@ export class ExperimentClient {
       return winner;
     }
 
-    if (experiment.status !== "active") return null;
+    // The dashboard uses "running" while older API clients use "active".
+    // Both represent a live experiment and must evaluate identically.
+    if (experiment.status !== "active" && experiment.status !== "running") return null;
 
     // Evaluate Targeting Rules
     if (!evaluateRules(experiment.rules, this.context)) return null;
 
-    const value = bucket(this.userId, key);
-    if (value >= experiment.rollout) return null;
+    // 1. Evaluate Rollout gating with dedicated rollout salt
+    const rollout = experiment.rollout ?? 100;
+    if (rollout < 100) {
+      const rolloutBucket = bucket(this.userId, `${key}:rollout`);
+      if (rolloutBucket >= rollout) return null;
+    }
+
+    // 2. Select variant with dedicated variant salt across variant weights
+    const totalWeight = experiment.variants.reduce((sum, v) => sum + (v.weight || 0), 0) || 100;
+    const variantBucket = bucket(this.userId, `${key}:variant`);
+    const targetPoint = (variantBucket / 100) * totalWeight;
 
     let cursor = 0;
     const selected = experiment.variants.find((variant) => {
       cursor += variant.weight;
-      return value < cursor;
+      return targetPoint < cursor;
     }) ?? experiment.variants[0];
 
     // 3. Persist Assignment
@@ -281,6 +319,7 @@ export class ExperimentClient {
     }
 
     if (this.eventQueue.length === 0) return;
+    if (!this.baseUrl && typeof window === "undefined") return;
 
     const events = [...this.eventQueue];
     this.eventQueue = [];

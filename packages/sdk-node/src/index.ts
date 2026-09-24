@@ -1,6 +1,6 @@
-import { bucket, evaluateRules, type ExperimentManifest, type Rule } from "experimentlab-core";
+import { bucket, evaluateRules, type ExperimentManifest, type Rule, type Variant } from "experimentlab-core";
 
-export type { ExperimentManifest } from "experimentlab-core";
+export type { ExperimentManifest, Variant } from "experimentlab-core";
 
 export interface Logger {
   warn(message: string, error?: unknown): void;
@@ -199,6 +199,47 @@ export class ExperimentNodeClient {
       flags[flag.key] = this.getFlag(userId, flag.key, false, context);
     }
     return flags;
+  }
+
+  getExperimentVariant(
+    userId: string,
+    experimentKey: string,
+    context: Record<string, unknown> = {}
+  ): Variant | null {
+    const experiment = this.manifest?.experiments?.find((candidate) => candidate.key === experimentKey);
+    if (!experiment) return null;
+
+    if (experiment.status === "completed" && experiment.winningVariantId) {
+      return experiment.variants.find((v) => v.id === experiment.winningVariantId) ?? null;
+    }
+
+    if (experiment.status !== "active" && experiment.status !== "running") return null;
+    if (!evaluateRules(experiment.rules as Rule[] | undefined, context)) return null;
+
+    const rollout = experiment.rollout ?? 100;
+    if (rollout < 100) {
+      const rolloutBucket = bucket(userId, `${experimentKey}:rollout`);
+      if (rolloutBucket >= rollout) return null;
+    }
+
+    const totalWeight = experiment.variants.reduce((sum, v) => sum + (v.weight || 0), 0) || 100;
+    const variantBucket = bucket(userId, `${experimentKey}:variant`);
+    const targetPoint = (variantBucket / 100) * totalWeight;
+
+    let cursor = 0;
+    return experiment.variants.find((variant) => {
+      cursor += variant.weight;
+      return targetPoint < cursor;
+    }) ?? experiment.variants[0];
+  }
+
+  getExperimentVariantKey(
+    userId: string,
+    experimentKey: string,
+    context: Record<string, unknown> = {}
+  ): string | null {
+    const variant = this.getExperimentVariant(userId, experimentKey, context);
+    return variant ? (variant.name || variant.id) : null;
   }
 
   track(userId: string, eventName: string, properties?: Record<string, unknown>): void {

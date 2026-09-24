@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/server";
 import { prisma } from "@experiment/db";
-
-function normalCdf(x: number) {
-  const t = 1 / (1 + 0.2316419 * Math.abs(x));
-  const d = 0.3989423 * Math.exp(-x * x / 2);
-  let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-  if (x > 0) p = 1 - p;
-  return p;
-}
+import { getExperimentResults } from "@/lib/results";
+import { z } from "zod";
+import { RuleSchema } from "@experiment/schemas";
 
 export async function GET(
   req: Request,
@@ -21,81 +16,31 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const experiment = await prisma.experiment.findFirst({
-    where: {
-      id,
-      organizationId: orgId
+  let experimentData;
+  try {
+    experimentData = await getExperimentResults(id, orgId);
+  } catch (err: any) {
+    if (err?.message === "Experiment not found") {
+      return NextResponse.json({ error: "Experiment not found" }, { status: 404 });
     }
-  });
-
-  if (!experiment) {
-    return NextResponse.json({ error: "Experiment not found" }, { status: 404 });
+    throw err;
   }
 
-  // Fetch real exposures and conversion metrics for this experiment matching by event name = experiment.key
-  const [exposures, conversions] = await Promise.all([
-    prisma.event.groupBy({
-      by: ["variantId"],
-      where: {
-        organizationId: orgId,
-        name: experiment.key,
-        type: "exposure"
-      },
-      _count: { id: true }
-    }),
-    prisma.event.groupBy({
-      by: ["variantId"],
-      where: {
-        organizationId: orgId,
-        name: experiment.key,
-        type: "track"
-      },
-      _count: { id: true }
-    })
-  ]);
-
-  const exposuresMap = new Map<string, number>();
-  exposures.forEach(e => {
-    if (e.variantId) exposuresMap.set(e.variantId, e._count.id);
-  });
-
-  const conversionsMap = new Map<string, number>();
-  conversions.forEach(c => {
-    if (c.variantId) conversionsMap.set(c.variantId, c._count.id);
-  });
-
+  const { experiment, results } = experimentData;
   const variantsList = Array.isArray(experiment.variants) ? (experiment.variants as any[]) : [];
-  
-  // Calculate statistical conversion rate & uplift vs control
-  const controlVariant = variantsList.find(v => v.id === "control") || variantsList[0];
-  const controlExposures = controlVariant ? (exposuresMap.get(controlVariant.id) || 0) : 0;
-  const controlConversions = controlVariant ? (conversionsMap.get(controlVariant.id) || 0) : 0;
-  const controlRate = controlExposures > 0 ? controlConversions / controlExposures : 0;
 
   const metrics = variantsList.map(v => {
-    const expCount = exposuresMap.get(v.id) || 0;
-    const convCount = conversionsMap.get(v.id) || 0;
-    const rate = expCount > 0 ? convCount / expCount : 0;
-    const uplift = controlRate > 0 ? (rate - controlRate) / controlRate : 0;
-    
-    // Z-Score calculation
-    const pooledP = (controlConversions + convCount) / Math.max(controlExposures + expCount, 1);
-    const se = Math.sqrt(Math.max(pooledP * (1 - pooledP) * (1 / Math.max(controlExposures, 1) + 1 / Math.max(expCount, 1)), 0.00001));
-    const zScore = se > 0 ? (rate - controlRate) / se : 0;
-    const pValue = Math.min(Math.max(2 * (1 - normalCdf(Math.abs(zScore))), 0.0001), 1.0);
-
+    const stats = results[v.id] || { exposures: 0, conversions: 0, rate: 0, uplift: 0, pValue: 1, isSignificant: false };
     return {
       variantId: v.id,
       variantName: v.name || v.id,
       weight: v.weight || 50,
-      exposures: expCount,
-      conversions: convCount,
-      conversionRate: rate,
-      upliftVsControl: uplift,
-      standardError: se,
-      zScore: Number(zScore.toFixed(3)),
-      pValue: Number(pValue.toFixed(4)),
-      isSignificant: pValue < 0.05,
+      exposures: stats.exposures,
+      conversions: stats.conversions,
+      conversionRate: stats.rate,
+      upliftVsControl: stats.uplift ?? 0,
+      pValue: Number((stats.pValue ?? 1).toFixed(4)),
+      isSignificant: stats.isSignificant,
       isWinner: experiment.winningVariantId === v.id
     };
   });
@@ -105,6 +50,11 @@ export async function GET(
     metrics
   });
 }
+const PatchExperimentSchema = z.object({
+  status: z.enum(["draft", "running", "active", "paused", "completed"]).optional(),
+  rules: z.array(RuleSchema).optional(),
+  rollout: z.number().int().min(0).max(100).optional()
+});
 
 export async function PATCH(
   req: Request,
@@ -117,7 +67,11 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const rawBody = await req.json().catch(() => ({}));
+  const parsed = PatchExperimentSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid payload", details: parsed.error.issues }, { status: 400 });
+  }
 
   const updated = await prisma.experiment.updateMany({
     where: {
@@ -125,11 +79,15 @@ export async function PATCH(
       organizationId: orgId
     },
     data: {
-      status: body.status,
-      rules: body.rules !== undefined ? body.rules : undefined,
-      rollout: body.rollout !== undefined ? Number(body.rollout) : undefined
+      status: parsed.data.status,
+      rules: parsed.data.rules !== undefined ? (parsed.data.rules as any) : undefined,
+      rollout: parsed.data.rollout !== undefined ? parsed.data.rollout : undefined
     }
   });
+
+  if (updated.count === 0) {
+    return NextResponse.json({ error: "NotFound" }, { status: 404 });
+  }
 
   return NextResponse.json({ success: true, updated });
 }

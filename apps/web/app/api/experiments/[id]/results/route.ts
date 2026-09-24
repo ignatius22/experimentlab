@@ -14,15 +14,12 @@ export async function GET(
   }
 
   try {
-    const results = await getExperimentResults(id);
-
-    // Security check: ensure experiment belongs to user's org
-    if (results.experiment.organizationId !== orgId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
+    const results = await getExperimentResults(id, orgId);
     return NextResponse.json(results);
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.message === "Experiment not found") {
+      return NextResponse.json({ error: "NotFound" }, { status: 404 });
+    }
     console.error("[Results API] Failed to fetch results", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

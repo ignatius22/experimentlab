@@ -106,4 +106,44 @@ describe("ExperimentNodeClient", () => {
     expect(sendEvents.mock.calls[1][0]).toHaveLength(2);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("event flush failed"), expect.any(Error));
   });
+
+  it("evaluates live and completed experiment variants on the server", async () => {
+    const experimentManifest: ExperimentManifest = {
+      flags: [],
+      experiments: [
+        {
+          key: "search_ranking",
+          status: "running",
+          rollout: 100,
+          variants: [
+            { id: "control", name: "Control", weight: 50 },
+            { id: "ai_ranked", name: "AI Ranked", weight: 50 }
+          ]
+        },
+        {
+          key: "completed_promo",
+          status: "completed",
+          rollout: 100,
+          winningVariantId: "ai_promo",
+          variants: [
+            { id: "control", name: "Control", weight: 50 },
+            { id: "ai_promo", name: "AI Promo", weight: 50 }
+          ]
+        }
+      ]
+    };
+
+    const client = clientWith({ fetchManifest: vi.fn().mockResolvedValue(experimentManifest) });
+    await client.ready();
+
+    const variant = client.getExperimentVariant("user_99", "search_ranking");
+    expect(variant).not.toBeNull();
+    expect(["control", "ai_ranked"]).toContain(variant?.id);
+    expect(client.getExperimentVariantKey("user_99", "search_ranking")).toBe(variant?.name);
+
+    // Completed experiment always yields winning variant
+    const winningVariant = client.getExperimentVariant("user_any", "completed_promo");
+    expect(winningVariant?.id).toBe("ai_promo");
+    expect(client.getExperimentVariantKey("user_any", "completed_promo")).toBe("AI Promo");
+  });
 });

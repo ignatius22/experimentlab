@@ -3,6 +3,9 @@ import { prisma } from "@experiment/db";
 import bcrypt from "bcryptjs";
 import { createSession } from "@/lib/auth/session";
 
+// Pre-computed dummy bcrypt hash (cost 10) to mitigate user enumeration (CWE-208)
+const DUMMY_HASH = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -18,6 +21,7 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
+      await bcrypt.compare(password, DUMMY_HASH);
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
