@@ -36,7 +36,7 @@ jobs:
         run: pnpm --filter @experiment/db build
 
       - name: Build Internal Packages
-        run: pnpm --filter @experiment/schemas build && pnpm --filter @experimentlab/core build && pnpm --filter @experimentlab/react build
+        run: pnpm --filter @experiment/schemas build && pnpm --filter experimentlab-core build && pnpm --filter experimentlab-react build && pnpm --filter experimentlab-node build
 
       - name: Run Typecheck
         run: pnpm typecheck
@@ -75,8 +75,8 @@ jobs:
           pnpm install --no-frozen-lockfile
           pnpm --filter @experiment/db build
           pnpm --filter @experiment/schemas build
-          pnpm --filter @experimentlab/core build
-          pnpm --filter @experimentlab/react build
+          pnpm --filter experimentlab-core build
+          pnpm --filter experimentlab-react build
           pnpm build
         env:
           DATABASE_URL: "postgresql://experiment_user:test_pwd@localhost:5432/experimentlab_db?schema=public"
