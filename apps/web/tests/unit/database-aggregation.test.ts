@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ findUnique: vi.fn(), queryRaw: vi.fn() }));
-vi.mock("@experiment/db", () => ({ prisma: { experiment: { findUnique: mocks.findUnique }, $queryRaw: mocks.queryRaw } }));
+vi.mock("@experiment/db", () => ({ prisma: { experiment: { findUnique: mocks.findUnique, findFirst: mocks.findUnique }, $queryRaw: mocks.queryRaw } }));
 
 import { formatTrendRows } from "../../lib/trends";
 import { getExperimentResults } from "../../lib/results";
