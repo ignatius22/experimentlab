@@ -216,28 +216,26 @@ export class ExperimentClient {
     const experiment = this.manifest.experiments.find((e) => e.key === key);
     if (!experiment) return null;
 
-    // 1. Check Sticky Assignments
-    if (this.assignments[key]) {
-      const existing = experiment.variants.find((v) => v.id === this.assignments[key]);
-      if (existing) {
-        this.trackExposure(key, existing.id);
-        return existing;
-      }
+    // The experiment's status decides first; a saved assignment only matters while it runs.
+    // A declared winner goes to everyone, including users who were in another variant.
+    // These users are no longer part of the test, so no exposure is recorded.
+    if (experiment.status === "completed") {
+      if (!experiment.winningVariantId) return null;
+      return experiment.variants.find((v) => v.id === experiment.winningVariantId) ?? null;
     }
 
-    // 2. Handle Completed Experiments (Winner Promoted)
-    if (experiment.status === "completed" && experiment.winningVariantId) {
-      const winner = experiment.variants.find(v => v.id === experiment.winningVariantId) ?? null;
-      if (winner) {
-        this.assignments[key] = winner.id;
-        this.saveAssignments();
-      }
-      return winner;
-    }
-
+    // Paused, draft or unknown: nobody gets a variant. The saved assignment is kept so a
+    // resumed experiment shows each user the same variant as before.
     // The dashboard uses "running" while older API clients use "active".
-    // Both represent a live experiment and must evaluate identically.
     if (experiment.status !== "active" && experiment.status !== "running") return null;
+
+    // Sticky assignment: a user keeps their variant for the life of the experiment.
+    const savedId = this.assignments[key];
+    const saved = savedId ? experiment.variants.find((v) => v.id === savedId) : undefined;
+    if (saved) {
+      this.trackExposure(key, saved.id);
+      return saved;
+    }
 
     // Evaluate Targeting Rules
     if (!evaluateRules(experiment.rules, this.context)) return null;

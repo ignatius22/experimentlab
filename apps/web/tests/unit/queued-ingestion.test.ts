@@ -16,7 +16,7 @@ describe("queued event ingestion", () => {
     const response = await POST(new Request("http://localhost/api/v1/client/events?apiKey=exp_live_test", { method: "POST", body: JSON.stringify(events) }));
     expect(response.status).toBe(202);
     expect(await response.json()).toEqual({ accepted: true, batchId: "batch_1" });
-    expect(mocks.enqueueEventBatch).toHaveBeenCalledWith("org_1", events);
+    expect(mocks.enqueueEventBatch).toHaveBeenCalledWith("org_1", events.map((event) => ({ ...event, payload: {} })));
     expect(performance.now() - started).toBeLessThan(500);
   });
 
