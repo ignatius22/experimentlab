@@ -14,7 +14,7 @@ describe("API Key Utilities", () => {
   it("generates a secure key with distinct client and server prefixes and valid SHA-256 hash", () => {
     const clientKey = generateApiKey("client");
     expect(clientKey.rawKey.startsWith("exp_client_")).toBe(true);
-    expect(clientKey.length ?? clientKey.rawKey.length).toBeGreaterThan(20);
+    expect(clientKey.rawKey.length).toBeGreaterThan(20);
     expect(clientKey.type).toBe("client");
     expect(clientKey.keyHash).toBe(hashApiKey(clientKey.rawKey));
     expect(clientKey.keyHash).toHaveLength(64);
