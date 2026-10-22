@@ -104,6 +104,34 @@ export interface ExperimentClientOptions {
   onEvent?: (event: Event) => void;
 }
 
+/** Where a browser keeps its own visitor ID when the app doesn't pass one. */
+export const ANONYMOUS_ID_KEY = "exp_anon_id";
+
+/**
+ * A stable ID for this browser, kept in localStorage.
+ * Without one, every signed-out visitor would share the ID "anonymous": they would all get
+ * the same variant and be counted as a single person.
+ */
+export function getAnonymousId(): string {
+  if (typeof window === "undefined") return "anonymous";
+  try {
+    const saved = window.localStorage.getItem(ANONYMOUS_ID_KEY);
+    if (saved) return saved;
+    const id = `anon_${randomId()}`;
+    window.localStorage.setItem(ANONYMOUS_ID_KEY, id);
+    return id;
+  } catch {
+    // Storage blocked (private mode, strict cookie settings): an ID for this page view only.
+    return `anon_${randomId()}`;
+  }
+}
+
+function randomId(): string {
+  const c = (globalThis as any).crypto;
+  if (c?.randomUUID) return c.randomUUID();
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
+}
+
 export class ExperimentClient {
   private publishableKey: string;
   private userId: string;
@@ -122,7 +150,7 @@ export class ExperimentClient {
 
   constructor(options: ExperimentClientOptions) {
     this.publishableKey = options.publishableKey || options.apiKey || "";
-    this.userId = options.userId || options.user?.id || "anonymous";
+    this.userId = options.userId || options.user?.id || getAnonymousId();
     this.baseUrl = options.baseUrl || options.endpoint || "";
     this.context = options.context || options.user?.attributes || {};
     this.onEvent = options.onEvent;
@@ -158,6 +186,11 @@ export class ExperimentClient {
     } catch (e) {
       console.error("[Experiment SDK] Failed to save assignments", e);
     }
+  }
+
+  /** The ID this client buckets and reports under: yours, or the browser's own when you gave none. */
+  getUserId() {
+    return this.userId;
   }
 
   setContext(context: Record<string, any>) {
