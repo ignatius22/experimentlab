@@ -1,15 +1,20 @@
 {
   "name": "experimentlab-core",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Core deterministic hashing and targeting evaluation engine for ExperimentLab",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
   "files": [
@@ -18,7 +23,9 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:package": "node ../../scripts/check-package.mjs",
+    "prepublishOnly": "pnpm build && pnpm check:package"
   },
   "devDependencies": {
     "tsup": "^8.3.5",
