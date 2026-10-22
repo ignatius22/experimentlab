@@ -34,7 +34,7 @@ export function ExperimentProvider({
     if (effectiveKey) {
       return new ExperimentClient({
         publishableKey: effectiveKey,
-        userId: userId || "anonymous",
+        userId, // without one, the client gives this browser its own ID
         baseUrl: baseUrl || "",
         context: context || {},
         initialManifest

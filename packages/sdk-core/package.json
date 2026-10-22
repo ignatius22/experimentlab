@@ -1,6 +1,6 @@
 {
   "name": "experimentlab-core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Core deterministic hashing and targeting evaluation engine for ExperimentLab",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
